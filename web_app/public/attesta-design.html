@@ -4,19 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="/support.js"></script>
-<template id="__bundler_thumbnail" data-bg-color="#1E150F">
-  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#1E150F"/>
-    <g fill="none" stroke="#D5B95C" stroke-width="4">
-      <circle cx="600" cy="400" r="220"/>
-      <circle cx="600" cy="400" r="150" stroke="#F4EADB" opacity="0.5"/>
-      <rect x="470" y="270" width="260" height="260"/>
-      <rect x="470" y="270" width="260" height="260" transform="rotate(45 600 400)" opacity="0.5"/>
-      <circle cx="600" cy="400" r="80"/>
-    </g>
-    <circle cx="600" cy="400" r="12" fill="#D5B95C"/>
-  </svg>
-</template>
 </head>
 <body>
 <x-dc>
@@ -37,6 +24,7 @@
   @keyframes spinslow{to{transform:rotate(360deg)}}
   @keyframes spinrev{to{transform:rotate(-360deg)}}
   @keyframes vscan{0%{transform:translateY(-46px)}100%{transform:translateY(46px)}}
+  @keyframes hexdepth{0%,100%{transform:scale(.86);opacity:.18}50%{transform:scale(1.08)}}
   input::placeholder{color:rgba(244,234,219,.3)}
   input:-webkit-autofill{-webkit-text-fill-color:#F4EADB; -webkit-box-shadow:0 0 0 1000px #2A1D13 inset}
 </style>
@@ -49,16 +37,16 @@
   <div style="min-height:100vh; display:flex; flex-direction:column; position:relative">
     <canvas id="gatefield" style="position:absolute; inset:0; width:100%; height:100%; opacity:.8; pointer-events:none"></canvas>
     <div style="position:relative; display:flex; justify-content:space-between; align-items:center; padding:26px clamp(20px,5vw,56px)">
-      <span style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:600; font-size:24px; letter-spacing:.02em">Attesta</span>
+      <span></span>
       <span style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.24em; color:rgba(244,234,219,.5)">REGISTER OF RECORD</span>
     </div>
     <div style="position:relative; flex:1; display:grid; grid-template-columns:1.25fr .75fr">
-      <div style="padding:clamp(34px,6vw,86px) clamp(20px,5vw,64px); display:flex; flex-direction:column; justify-content:center; border-right:1px solid rgba(244,234,219,.13)">
-        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(46px,8vw,104px); line-height:.96; letter-spacing:-.015em; margin:0; max-width:13ch">All the proof <span style="font-style:italic">you</span> need</h1>
+      <div style="padding:clamp(34px,6vw,86px) clamp(20px,5vw,64px); display:flex; flex-direction:column; justify-content:center">
+        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(54px,9.5vw,128px); line-height:.94; letter-spacing:-.02em; margin:0; max-width:14ch">All the proof<br><span style="font-style:italic">you</span> need</h1>
         <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,26px); line-height:1.4; color:rgba(244,234,219,.5); max-width:46ch; margin:28px 0 0; font-style:italic">The files themselves never leave your device.</p>
         <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.06em; margin:clamp(30px,4vw,46px) 0 0; color:rgba(244,234,219,.5); word-break:break-all; max-width:60ch"><span style="color:#D5B95C">LIVE FINGERPRINT » </span><span id="gate-hash"></span><span style="animation:blink 1s steps(1) infinite">▌</span></p>
       </div>
-      <div style="padding:clamp(30px,4vw,56px) clamp(22px,4vw,48px); display:flex; flex-direction:column; justify-content:center; background:rgba(42,29,19,.82); backdrop-filter:blur(2px)">
+      <div style="padding:clamp(30px,4vw,56px) clamp(22px,4vw,48px); display:flex; flex-direction:column; justify-content:center; background:transparent">
         <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.24em; color:rgba(244,234,219,.5); margin:0 0 22px">SIGN IN TO CONTINUE</p>
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px">
           <button onClick="{{ siteGoogle }}" style-hover="background:#F4EADB; color:#1E150F" style="display:flex; flex-direction:column; align-items:center; gap:9px; background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:18px 10px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.1em"><span style="font-family:'Cormorant Garamond',Georgia,serif; font-size:24px; font-weight:600; line-height:1">G</span>GOOGLE</button>
@@ -103,11 +91,10 @@
   <sc-if value="{{ showAttesta }}" hint-placeholder-val="{{ true }}">
   <main>
     <div style="display:flex; border-bottom:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace; flex-wrap:wrap">
-      <button onClick="{{ goHero }}" style="background:transparent; border:0; color:#F4EADB; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace">HOME</button>
-      <button onClick="{{ goSeal }}" style="background:transparent; border:0; color:#F4EADB; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace">SEAL</button>
-      <button onClick="{{ goVerify }}" style="background:transparent; border:0; color:#F4EADB; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace">VERIFY</button>
-      <button onClick="{{ goRegister }}" style="background:transparent; border:0; color:#F4EADB; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace">REGISTER</button>
-      <div style="margin-left:auto; display:flex; align-items:center; padding:0 22px; font-size:10px; letter-spacing:.16em; color:#D5B95C">{{ viewLabel }}</div>
+      <button onClick="{{ goHero }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navHomeColor }}">HOME</button>
+      <button onClick="{{ goSeal }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navSealColor }}">SEAL</button>
+      <button onClick="{{ goVerify }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navVerifyColor }}">VERIFY</button>
+      <button onClick="{{ goRegister }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navRegisterColor }}">REGISTER</button>
     </div>
 
     <!-- HERO -->
@@ -115,17 +102,13 @@
     <section style="position:relative; border-bottom:1px solid rgba(244,234,219,.13); overflow:hidden">
       <canvas id="hashfield2" style="position:absolute; inset:0; width:100%; height:100%; opacity:.85; pointer-events:none"></canvas>
       <div style="position:relative; padding:clamp(40px,8vw,120px) clamp(20px,5vw,64px) clamp(48px,8vw,110px); max-width:1100px">
-        <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.3em; color:#D5B95C; margin:0 0 clamp(24px,4vw,44px)">ATTESTA · CRYPTOGRAPHIC DOCUMENT CUSTODY</p>
-        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(48px,10vw,140px); line-height:.92; letter-spacing:-.02em; margin:0; max-width:15ch">Proof a document existed, <span style="font-style:italic; color:rgba(244,234,219,.5)">unaltered,</span> at a moment in time.</h1>
-        <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(19px,2.4vw,28px); line-height:1.4; max-width:42ch; margin:clamp(28px,4vw,44px) 0 0; color:rgba(244,234,219,.5)">A SHA-256 fingerprint frozen to Sui, the manifest stored on Walrus. The document itself never leaves this device.</p>
-        <div style="display:flex; align-items:center; gap:12px; margin-top:clamp(30px,5vw,46px); font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.2em; color:rgba(244,234,219,.55)"><span>SCROLL TO BEGIN</span><span style="font-size:16px; display:inline-block; animation:floatdown 1.8s ease-in-out infinite">↓</span></div>
-        <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.06em; margin:clamp(28px,5vw,46px) 0 0; color:rgba(244,234,219,.5); word-break:break-all"><span style="color:#D5B95C">LIVE FINGERPRINT » </span><span id="hero-hash2"></span><span style="animation:blink 1s steps(1) infinite">▌</span></p>
+        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(48px,10vw,140px); line-height:.92; letter-spacing:-.02em; margin:0; max-width:15ch">Proof a document existed, <span style="font-style:italic; color:rgba(244,234,219,.5)">unaltered.</span></h1>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(19px,2.4vw,28px); line-height:1.4; max-width:42ch; margin:clamp(28px,4vw,44px) 0 0; color:rgba(244,234,219,.5)">A SHA-256 fingerprint frozen to Sui, the manifest stored on Walrus.</p>
       </div>
-      <div style="position:relative; display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace">
-        <div style="padding:18px 20px; border-right:1px solid rgba(244,234,219,.13)"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">01 / DOCUMENT</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Stays on device</div></div>
-        <div style="padding:18px 20px; border-right:1px solid rgba(244,234,219,.13)"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">02 / SHA-256</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Hashed in browser</div></div>
-        <div style="padding:18px 20px; border-right:1px solid rgba(244,234,219,.13)"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">03 / SUI</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Hash + ref + time</div></div>
-        <div style="padding:18px 20px"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">04 / WALRUS</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Manifest blob</div></div>
+      <div style="position:relative; display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace">
+        <div style="padding:18px 20px; border-right:1px solid rgba(244,234,219,.13)"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">01 / DOCUMENT</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Hashed locally</div></div>
+        <div style="padding:18px 20px; border-right:1px solid rgba(244,234,219,.13)"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">02 / SUI</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">On-chain record</div></div>
+        <div style="padding:18px 20px"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">03 / WALRUS</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Manifest ID</div></div>
       </div>
     </section>
 
@@ -135,28 +118,24 @@
         <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.28em; color:#D5B95C; margin-bottom:22px">01 — CREATE A RECORD</div>
         <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(40px,6.5vw,86px); line-height:.95; letter-spacing:-.02em; margin:0">Seal a document</h2>
         <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,25px); line-height:1.45; max-width:40ch; margin:24px 0 0; color:rgba(244,234,219,.55)">Drop a file and Attesta fingerprints it in your browser. Only the hash, your reference and the moment in time are frozen to the chain — the file never moves.</p>
-        <div style="display:flex; flex-wrap:wrap; gap:10px; margin:30px 0 0; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.12em; color:rgba(244,234,219,.6)">
-          <span style="border:1px solid rgba(244,234,219,.16); padding:8px 12px">SHA-256 LOCALLY</span>
-          <span style="border:1px solid rgba(244,234,219,.16); padding:8px 12px">FREEZE TO SUI</span>
-          <span style="border:1px solid rgba(244,234,219,.16); padding:8px 12px">MANIFEST ON WALRUS</span>
-        </div>
-        <div style="display:inline-flex; align-items:center; gap:12px; margin-top:34px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE SEALING DESK <span style="font-size:16px">→</span></div>
+        <div style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE SEALING DESK →</div>
       </div>
       <div style="display:flex; justify-content:center">
         <svg viewBox="0 0 240 240" style="width:100%; max-width:300px; height:auto; overflow:visible">
-          <g fill="none" stroke-width="1">
-            <circle cx="120" cy="120" r="112" stroke="rgba(244,234,219,.18)"></circle>
-            <g style="transform-origin:120px 120px; animation:spinslow 60s linear infinite">
-              <circle cx="120" cy="120" r="96" stroke="#D5B95C" stroke-dasharray="2 8"></circle>
-            </g>
-            <circle cx="120" cy="120" r="78" stroke="rgba(244,234,219,.28)"></circle>
-            <g style="transform-origin:120px 120px; animation:spinrev 90s linear infinite">
-              <rect x="54" y="54" width="132" height="132" stroke="rgba(213,185,92,.5)"></rect>
-              <rect x="54" y="54" width="132" height="132" stroke="rgba(213,185,92,.3)" transform="rotate(45 120 120)"></rect>
-            </g>
-            <circle cx="120" cy="120" r="40" stroke="#D5B95C"></circle>
+          <defs>
+            <linearGradient id="hexEdge" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#D5B95C"></stop>
+              <stop offset="0.5" stop-color="rgba(244,234,219,.5)"></stop>
+              <stop offset="1" stop-color="#5BA478"></stop>
+            </linearGradient>
+          </defs>
+          <g fill="none" stroke="url(#hexEdge)" style="transform-origin:120px 120px">
+            <polygon points="120,14 211,67 211,173 120,226 29,173 29,67" stroke-width="1" opacity=".16" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite"></polygon>
+            <polygon points="120,38 190,79 190,161 120,202 50,161 50,79" stroke-width="1" opacity=".28" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite; animation-delay:-1.4s"></polygon>
+            <polygon points="120,62 169,91 169,149 120,178 71,149 71,91" stroke-width="1.25" opacity=".5" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite; animation-delay:-2.8s"></polygon>
+            <polygon points="120,86 148,103 148,137 120,154 92,137 92,103" stroke-width="1.5" opacity=".85" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite; animation-delay:-4.2s"></polygon>
           </g>
-          <circle cx="120" cy="120" r="5" fill="#D5B95C"></circle>
+          <circle cx="120" cy="120" r="3.5" fill="#D5B95C"></circle>
         </svg>
       </div>
     </section>
@@ -166,14 +145,14 @@
       <div style="display:flex; justify-content:center; order:0">
         <svg viewBox="0 0 240 240" style="width:100%; max-width:300px; height:auto; overflow:visible">
           <g fill="none" stroke-width="1">
-            <circle cx="120" cy="120" r="112" stroke="rgba(244,234,219,.18)"></circle>
-            <path d="M120 36 A84 84 0 0 1 120 204" stroke="rgba(91,164,120,.6)" stroke-width="1.5"></path>
-            <path d="M120 58 A62 62 0 0 1 120 182" stroke="rgba(244,234,219,.25)"></path>
-            <path d="M120 80 A40 40 0 0 1 120 160" stroke="rgba(91,164,120,.45)"></path>
+            <circle cx="120" cy="120" r="112" stroke="rgba(244,234,219,.07)"></circle>
+            <path d="M120 36 A84 84 0 0 1 120 204" stroke="rgba(91,164,120,.22)" stroke-width="1.5"></path>
+            <path d="M120 58 A62 62 0 0 1 120 182" stroke="rgba(244,234,219,.10)"></path>
+            <path d="M120 80 A40 40 0 0 1 120 160" stroke="rgba(91,164,120,.16)"></path>
           </g>
-          <path d="M92 122 l20 22 l40 -50" fill="none" stroke="#5BA478" stroke-width="3" stroke-linecap="square"></path>
-          <g style="transform-origin:center; animation:vscan 2.6s ease-in-out infinite alternate">
-            <line x1="40" y1="120" x2="200" y2="120" stroke="rgba(213,185,92,.55)" stroke-width="1"></line>
+          <path d="M106 120 l10 11 l20 -25" fill="none" stroke="rgba(91,164,120,.55)" stroke-width="2.5" stroke-linecap="square"></path>
+          <g style="transform-origin:120px 120px; animation:vscan 2.8s ease-in-out infinite alternate">
+            <line x1="36" y1="120" x2="204" y2="120" stroke="rgba(213,185,92,.6)" stroke-width="1"></line>
           </g>
         </svg>
       </div>
@@ -181,12 +160,7 @@
         <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.28em; color:#D5B95C; margin-bottom:22px">02 — PROVE A RECORD</div>
         <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(40px,6.5vw,86px); line-height:.95; letter-spacing:-.02em; margin:0">Verify a seal</h2>
         <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,25px); line-height:1.45; max-width:40ch; margin:24px 0 0; color:rgba(244,234,219,.55)">Re-hash any file against its certificate. Attesta scans the fingerprint nibble by nibble and tells you, beyond doubt, whether the document is unaltered since sealing.</p>
-        <div style="display:flex; flex-wrap:wrap; gap:10px; margin:30px 0 0; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.12em; color:rgba(244,234,219,.6)">
-          <span style="border:1px solid rgba(244,234,219,.16); padding:8px 12px">RE-HASH LOCALLY</span>
-          <span style="border:1px solid rgba(244,234,219,.16); padding:8px 12px">COMPARE ON-CHAIN</span>
-          <span style="border:1px solid rgba(244,234,219,.16); padding:8px 12px">TAMPER EVIDENT</span>
-        </div>
-        <div style="display:inline-flex; align-items:center; gap:12px; margin-top:34px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE VERIFIER <span style="font-size:16px">→</span></div>
+        <div style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE VERIFIER →</div>
       </div>
     </section>
 
@@ -626,96 +600,138 @@ class Component extends DCLogic {
     return true;
   }
 
-  // Aurelia — an original, crisp vectorised flow-field (three.js line streaks)
-  initAurelia(){
-    if(this._aurReady || typeof THREE==='undefined') return;
-    const canvas=document.getElementById('gatefield'); if(!canvas) return;
+  // Double helix — nodes condense onto two spiralling strands (with base-pair rungs),
+  // twist through depth, then dissipate into a drifting cloud and reform. A looping lifecycle.
+  initJelly(id){
+    if(typeof THREE==='undefined') return;
+    if(!this._fields) this._fields={};
+    if(this._fields[id]) return;
+    const canvas=document.getElementById(id); if(!canvas) return;
     let w=canvas.clientWidth, h=canvas.clientHeight; if(!w||!h) return;
     const dpr=Math.min(2,window.devicePixelRatio||1);
     const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
     renderer.setPixelRatio(dpr); renderer.setSize(w,h,false); renderer.setClearColor(0x000000,0);
     const scene=new THREE.Scene();
     const cam=new THREE.OrthographicCamera(-w/2,w/2,h/2,-h/2,-1000,1000); cam.position.z=10;
-    const N=1300;
+    const N=2200;
     const pos=new Float32Array(N*2*3), col=new Float32Array(N*2*3);
     const npos=new Float32Array(N*3), ncol=new Float32Array(N*3);
-    const P=[]; const palette=[[0.84,0.73,0.36],[0.96,0.92,0.86],[0.62,0.40,0.24]];
+    const BRASS=[0.84,0.73,0.36], CREAM=[0.93,0.90,0.84], GREEN=[0.36,0.64,0.47];
+    const P=[];
     for(let i=0;i<N;i++){
       const x=(Math.random()-0.5)*w, y=(Math.random()-0.5)*h;
-      P.push({x,y,vx:0,vy:0,sp:0.5+Math.random()*1.1});
-      const c=palette[Math.random()<0.55?0:(Math.random()<0.6?1:2)];
-      const m=0.55+Math.random()*0.6, r=c[0]*m, g=c[1]*m, b=c[2]*m;
-      for(let k=0;k<2;k++){ const o=(i*2+k)*3; pos[o]=x; pos[o+1]=y; pos[o+2]=0; col[o]=r; col[o+1]=g; col[o+2]=b; }
-      npos[i*3]=x; npos[i*3+1]=y; ncol[i*3]=r; ncol[i*3+1]=g; ncol[i*3+2]=b;
+      const isRung=Math.random()<0.22;            // ~22% are base-pair rung nodes
+      const strand=Math.random()<0.5?0:1;
+      const u=Math.random();                       // position along the helix [0,1]
+      const s=Math.random();                       // across-rung parameter [0,1]
+      const base=isRung?GREEN:(strand===0?BRASS:CREAM);
+      P.push({ x,y,hx:x,hy:y,vx:0,vy:0, sp:0.6+Math.random()*0.9, ph:Math.random()*6.283, isRung, strand, u, s, base });
+      const m=0.5+Math.random()*0.4;
+      for(let k=0;k<2;k++){ const o=(i*2+k)*3; pos[o]=x; pos[o+1]=y; pos[o+2]=0; col[o]=base[0]*m; col[o+1]=base[1]*m; col[o+2]=base[2]*m; }
+      npos[i*3]=x; npos[i*3+1]=y; ncol[i*3]=base[0]*m; ncol[i*3+1]=base[1]*m; ncol[i*3+2]=base[2]*m;
     }
     const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
     geo.setAttribute('color',new THREE.BufferAttribute(col,3));
-    const mat=new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.9, blending:THREE.NormalBlending, depthTest:false });
-    scene.add(new THREE.LineSegments(geo,mat));
+    scene.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.85, depthTest:false })));
     const ngeo=new THREE.BufferGeometry();
     ngeo.setAttribute('position',new THREE.BufferAttribute(npos,3));
     ngeo.setAttribute('color',new THREE.BufferAttribute(ncol,3));
-    const nmat=new THREE.PointsMaterial({ size:2, vertexColors:true, transparent:true, opacity:0.95, sizeAttenuation:false, depthTest:false });
-    scene.add(new THREE.Points(ngeo,nmat));
-    this._aur={ renderer, scene, cam, geo, ngeo, P, pos, npos, w, h, t0:performance.now() };
-    this._aurReady=true;
+    scene.add(new THREE.Points(ngeo,new THREE.PointsMaterial({ size:2, vertexColors:true, transparent:true, opacity:0.95, sizeAttenuation:false, depthTest:false })));
+    this._fields[id]={ id, renderer, scene, cam, geo, ngeo, P, pos, col, npos, ncol, w, h, t0:performance.now() };
   }
-  stepAurelia(){
-    const A=this._aur; if(!A) return;
-    const canvas=document.getElementById('gatefield'); if(!canvas) return;
+  stepJelly(F){
+    const canvas=document.getElementById(F.id); if(!canvas) return;
     let w=canvas.clientWidth, h=canvas.clientHeight;
-    if(w&&h&&(w!==A.w||h!==A.h)){ A.w=w; A.h=h; A.renderer.setSize(w,h,false);
-      A.cam.left=-w/2; A.cam.right=w/2; A.cam.top=h/2; A.cam.bottom=-h/2; A.cam.updateProjectionMatrix(); }
-    const t=(performance.now()-A.t0)/1000, P=A.P, pos=A.pos, npos=A.npos, W=A.w, H=A.h, TAIL=7;
+    if(w&&h&&(w!==F.w||h!==F.h)){
+      F.w=w; F.h=h; F.renderer.setSize(w,h,false);
+      F.cam.left=-w/2; F.cam.right=w/2; F.cam.top=h/2; F.cam.bottom=-h/2; F.cam.updateProjectionMatrix();
+    }
+    const t=(performance.now()-F.t0)/1000, P=F.P, pos=F.pos, col=F.col, npos=F.npos, ncol=F.ncol, W=F.w, H=F.h, TAIL=4, TWO=6.28318;
+    // helix geometry — vertical twin strands sitting left, behind the headline
+    const cx=-W*0.05, spanH=H*0.98, R=Math.min(W,H)*0.165, turns=3.1, spin=t*0.5;
+    // lifecycle: form -> hold (spiralling) -> dissipate -> reform
+    const CYC=17, cph=(t%CYC)/CYC, ss=x=>{ x=Math.max(0,Math.min(1,x)); return x*x*(3-2*x); };
+    let form;
+    if(cph<0.20) form=ss(cph/0.20);
+    else if(cph<0.72) form=1;
+    else form=1-ss((cph-0.72)/0.28);
+    const hdrift=Math.min(W,H)*0.0004;
     for(let i=0;i<P.length;i++){
       const p=P[i];
-      const ax=Math.sin(p.y*0.0042+t*0.20)+Math.sin(p.x*0.0021-t*0.13)+0.6*Math.cos((p.x+p.y)*0.0017+t*0.08);
-      const ay=Math.cos(p.x*0.0038-t*0.17)+Math.sin(p.y*0.0026+t*0.11)+0.6*Math.sin((p.x-p.y)*0.0015-t*0.06);
-      p.vx=p.vx*0.90+ax*0.20*p.sp; p.vy=p.vy*0.90+(ay-0.25)*0.20*p.sp;
+      const y=(p.u-0.5)*spanH;
+      const theta=p.u*turns*TWO + spin;
+      // two backbones offset by PI; rungs interpolate across the base pair
+      let tx, depth;
+      if(p.isRung){
+        const x0=cx+Math.cos(theta)*R, x1=cx+Math.cos(theta+Math.PI)*R;
+        const d0=Math.sin(theta), d1=Math.sin(theta+Math.PI);
+        tx=x0+(x1-x0)*p.s; depth=d0+(d1-d0)*p.s;
+      } else {
+        const th=theta+p.strand*Math.PI;
+        tx=cx+Math.cos(th)*R; depth=Math.sin(th);
+      }
+      const ty=y;
+      // dispersed home drifts on a slow flow field so the cloud stays alive & full
+      const fa=Math.sin(p.hy*0.0026+t*0.06)+0.5*Math.cos((p.hx+p.hy)*0.0011+t*0.03);
+      const fb=Math.cos(p.hx*0.0024-t*0.05)+0.5*Math.sin((p.hx-p.hy)*0.0010-t*0.025);
+      const ang=fa+fb+p.ph;
+      p.hx+=Math.cos(ang)*hdrift; p.hy+=Math.sin(ang)*hdrift*0.7;
+      if(p.hx<-W/2)p.hx=W/2; if(p.hx>W/2)p.hx=-W/2;
+      if(p.hy<-H/2)p.hy=H/2; if(p.hy>H/2)p.hy=-H/2;
+      // desired = blend between dispersed home and helix target
+      const dx=p.hx+(tx-p.hx)*form, dy=p.hy+(ty-p.hy)*form;
+      const sp=0.85+p.sp*0.12;
+      p.vx=p.vx*0.90+(dx-p.x)*0.026*sp;
+      p.vy=p.vy*0.90+(dy-p.y)*0.026*sp;
+      const vmax=Math.min(W,H)*0.006, v2=p.vx*p.vx+p.vy*p.vy;
+      if(v2>vmax*vmax){ const s=vmax/Math.sqrt(v2); p.vx*=s; p.vy*=s; }
       p.x+=p.vx; p.y+=p.vy;
-      if(p.x<-W/2-20)p.x=W/2+20; if(p.x>W/2+20)p.x=-W/2-20;
-      if(p.y<-H/2-20)p.y=H/2+20; if(p.y>H/2+20)p.y=-H/2-20;
+      // depth shading: front of the twist brighter, back dim — sells the 3D rotation
+      const near=0.5+0.5*depth, bright=(0.32+0.68*near)*(0.45+0.55*form), b=p.base;
       const o=(i*2)*3;
+      col[o]=col[o+3]=b[0]*bright; col[o+1]=col[o+4]=b[1]*bright; col[o+2]=col[o+5]=b[2]*bright;
+      ncol[i*3]=b[0]*bright; ncol[i*3+1]=b[1]*bright; ncol[i*3+2]=b[2]*bright;
       pos[o]=p.x-p.vx*TAIL; pos[o+1]=p.y-p.vy*TAIL; pos[o+2]=0;
       pos[o+3]=p.x; pos[o+4]=p.y; pos[o+5]=0;
       npos[i*3]=p.x; npos[i*3+1]=p.y;
     }
-    A.geo.attributes.position.needsUpdate=true;
-    A.ngeo.attributes.position.needsUpdate=true;
-    A.renderer.render(A.scene,A.cam);
+    F.geo.attributes.position.needsUpdate=true; F.geo.attributes.color.needsUpdate=true;
+    F.ngeo.attributes.position.needsUpdate=true; F.ngeo.attributes.color.needsUpdate=true;
+    F.renderer.render(F.scene,F.cam);
   }
-  startGate(){
-    const tw=()=>{
-      const el=document.getElementById('gate-hash'); if(!el) return;
-      let h=this.rhex(64), i=0;
-      clearInterval(this._gtypeT);
-      this._gtypeT=setInterval(()=>{ el.textContent=h.slice(0,i); i++; if(i>64){ clearInterval(this._gtypeT); setTimeout(tw,1400);} },22);
-    };
-    tw();
-    cancelAnimationFrame(this._graf);
+  runField(id, rafKey){
+    cancelAnimationFrame(this[rafKey]);
     let tries=0;
     const loop=()=>{
       try{
-        if(this._aurFailed){ return; }
-        if(!this._aurReady){ if(tries++>240){ this._aurFailed=true; return; } this.initAurelia(); }
-        else { this.stepAurelia(); }
-      }catch(err){ this._aurFailed=true; console.warn('[aurelia] disabled:', err && err.message); return; }
-      this._graf=requestAnimationFrame(loop);
+        if(this['_fieldFail_'+id]) return;
+        const F=this._fields && this._fields[id];
+        if(!F){ if(tries++>240){ this['_fieldFail_'+id]=true; return; } this.initJelly(id); }
+        else this.stepJelly(F);
+      }catch(err){ this['_fieldFail_'+id]=true; console.warn('[jelly] disabled:', err && err.message); return; }
+      this[rafKey]=requestAnimationFrame(loop);
     };
-    this._graf=requestAnimationFrame(loop);
+    this[rafKey]=requestAnimationFrame(loop);
+  }
+  liveHash(elId, key){
+    clearInterval(this[key]);
+    const H='0123456789abcdef';
+    let hash=this.rhex(64).split('');
+    this[key]=setInterval(()=>{
+      const e=document.getElementById(elId); if(!e) return;
+      const n=2+Math.floor(Math.random()*3);
+      for(let k=0;k<n;k++){ hash[Math.floor(Math.random()*64)]=H[Math.floor(Math.random()*16)]; }
+      e.textContent=hash.join('');
+    },60);
+  }
+  startGate(){
+    this.liveHash('gate-hash','_gtypeT');
+    this.runField('gatefield','_graf');
   }
   startHero(){
-    const tw=()=>{
-      const el=document.getElementById('hero-hash2'); if(!el) return;
-      let h=this.rhex(64), i=0;
-      clearInterval(this._typeT);
-      this._typeT=setInterval(()=>{ el.textContent=h.slice(0,i); i++; if(i>64){ clearInterval(this._typeT); setTimeout(tw,1400);} },22);
-    };
-    tw();
-    cancelAnimationFrame(this._raf);
-    const loop=()=>{ this.fieldDraw('hashfield2','_hpts'); this._raf=requestAnimationFrame(loop); };
-    this._raf=requestAnimationFrame(loop);
+    this.liveHash('hero-hash2','_typeT');
+    this.runField('hashfield2','_raf');
   }
 
   // ---------- site gate auth ----------
@@ -887,6 +903,10 @@ class Component extends DCLogic {
       surfaceAttestaActive:isA, surfaceLexiActive:isL,
       goHero:()=>this.goHero(), goSeal:()=>this.goSeal(), goVerify:()=>this.goVerify(), goRegister:()=>this.goRegister(),
       viewLabel: (s.view||'').toUpperCase(),
+      navHomeColor: s.view==='hero' ? '#D5B95C' : '#F4EADB',
+      navSealColor: s.view==='seal' ? '#D5B95C' : '#F4EADB',
+      navVerifyColor: s.view==='verify' ? '#D5B95C' : '#F4EADB',
+      navRegisterColor: s.view==='register' ? '#D5B95C' : '#F4EADB',
       showAttesta:isA, showLexi:isL,
       showHero:s.view==='hero', showSeal:s.view==='seal', showVerify:s.view==='verify', showRegister:s.view==='register',
 
