@@ -1,5 +1,5 @@
-import AttestaDualSurface from "../src/AttestaDualSurface";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <AttestaDualSurface />;
+  redirect("/attesta-design.html");
 }
