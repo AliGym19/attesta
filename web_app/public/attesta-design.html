@@ -102,7 +102,7 @@
     <section style="position:relative; border-bottom:1px solid rgba(244,234,219,.13); overflow:hidden">
       <canvas id="hashfield2" style="position:absolute; inset:0; width:100%; height:100%; opacity:.85; pointer-events:none"></canvas>
       <div style="position:relative; padding:clamp(40px,8vw,120px) clamp(20px,5vw,64px) clamp(48px,8vw,110px); max-width:1100px">
-        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(48px,10vw,140px); line-height:.92; letter-spacing:-.02em; margin:0; max-width:15ch">Proof a document existed, <span style="font-style:italic; color:rgba(244,234,219,.5)">unaltered.</span></h1>
+        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(48px,10vw,140px); line-height:.92; letter-spacing:-.02em; margin:0; max-width:15ch">Proof a document existed, <span style="font-style:italic; color:#D5B95C">unaltered.</span></h1>
         <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(19px,2.4vw,28px); line-height:1.4; max-width:42ch; margin:clamp(28px,4vw,44px) 0 0; color:rgba(244,234,219,.5)">A SHA-256 fingerprint frozen to Sui, the manifest stored on Walrus.</p>
       </div>
       <div style="position:relative; display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace">
@@ -113,12 +113,12 @@
     </section>
 
     <!-- SEAL — its own space -->
-    <section onClick="{{ goSeal }}" style-hover="background:#241811" style="position:relative; cursor:pointer; border-top:1px solid rgba(244,234,219,.13); padding:clamp(54px,9vw,128px) clamp(20px,5vw,64px); display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,6vw,80px); align-items:center; transition:background .25s">
+    <section style="position:relative; border-top:1px solid rgba(244,234,219,.13); padding:clamp(54px,9vw,128px) clamp(20px,5vw,64px); display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,6vw,80px); align-items:center">
       <div>
         <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.28em; color:#D5B95C; margin-bottom:22px">01 — CREATE A RECORD</div>
         <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(40px,6.5vw,86px); line-height:.95; letter-spacing:-.02em; margin:0">Seal a document</h2>
         <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,25px); line-height:1.45; max-width:40ch; margin:24px 0 0; color:rgba(244,234,219,.55)">Drop a file and Attesta fingerprints it in your browser. Only the hash, your reference and the moment in time are frozen to the chain — the file never moves.</p>
-        <div style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE SEALING DESK →</div>
+        <button onClick="{{ goSeal }}" style-hover="background:#D5B95C; color:#1E150F" style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; background:transparent; border:1px solid #D5B95C; padding:13px 20px; cursor:pointer; transition:background .2s, color .2s">OPEN THE SEALING DESK →</button>
       </div>
       <div style="display:flex; justify-content:center">
         <svg viewBox="0 0 240 240" style="width:100%; max-width:300px; height:auto; overflow:visible">
@@ -141,7 +141,7 @@
     </section>
 
     <!-- VERIFY — its own space -->
-    <section onClick="{{ goVerify }}" style-hover="background:#241811" style="position:relative; cursor:pointer; border-top:1px solid rgba(244,234,219,.13); padding:clamp(54px,9vw,128px) clamp(20px,5vw,64px); display:grid; grid-template-columns:.95fr 1.05fr; gap:clamp(32px,6vw,80px); align-items:center; transition:background .25s">
+    <section style="position:relative; border-top:1px solid rgba(244,234,219,.13); padding:clamp(54px,9vw,128px) clamp(20px,5vw,64px); display:grid; grid-template-columns:.95fr 1.05fr; gap:clamp(32px,6vw,80px); align-items:center">
       <div style="display:flex; justify-content:center; order:0">
         <svg viewBox="0 0 240 240" style="width:100%; max-width:300px; height:auto; overflow:visible">
           <g fill="none" stroke-width="1">
@@ -160,7 +160,7 @@
         <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.28em; color:#D5B95C; margin-bottom:22px">02 — PROVE A RECORD</div>
         <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(40px,6.5vw,86px); line-height:.95; letter-spacing:-.02em; margin:0">Verify a seal</h2>
         <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,25px); line-height:1.45; max-width:40ch; margin:24px 0 0; color:rgba(244,234,219,.55)">Re-hash any file against its certificate. Attesta scans the fingerprint nibble by nibble and tells you, beyond doubt, whether the document is unaltered since sealing.</p>
-        <div style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE VERIFIER →</div>
+        <button onClick="{{ goVerify }}" style-hover="background:#D5B95C; color:#1E150F" style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; background:transparent; border:1px solid #D5B95C; padding:13px 20px; cursor:pointer; transition:background .2s, color .2s">OPEN THE VERIFIER →</button>
       </div>
     </section>
 
@@ -332,7 +332,7 @@
                   <td style="padding:14px 16px; border-right:1px solid rgba(244,234,219,.13); vertical-align:top; font-size:11px">{{ row.fpShort }}</td>
                   <td style="padding:14px 16px; border-right:1px solid rgba(244,234,219,.13); vertical-align:top; font-size:11px">{{ row.time }}</td>
                   <td style="padding:14px 16px; border-right:1px solid rgba(244,234,219,.13); vertical-align:top"><span style="font-size:11px; color:#D5B95C; text-decoration:underline">{{ row.certShort }} ↗</span></td>
-                  <td style="padding:14px 16px; vertical-align:top"><button onClick="{{ row.reVerify }}" style-hover="background:#F4EADB;color:#1E150F" style="background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:7px 12px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.12em">RE-VERIFY</button></td>
+                  <td style="padding:14px 16px; vertical-align:top"><button onClick="{{ row.reVerify }}" style-hover="background:#F4EADB;color:#1E150F" style="background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:7px 12px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.12em; white-space:nowrap">CHECK VERIFICATION</button></td>
                 </tr>
               </sc-for>
             </tbody>
