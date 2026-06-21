@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Attesta / LexiVault — Design Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --color-bg-base:        #FFFFFF;
+    --color-text-primary:   #000000;
+    --color-accent:         #6E2433;
+    --color-verified:       #2C5E3F;
+    --color-tampered:       #8C2A1C;
+    --color-chain-live:     #9A772C;
+  }
+  [data-surface="vault"] {
+    --color-bg-base:        #000000;
+    --color-text-primary:   #FFFFFF;
+    --color-accent:         #6E2433;
+    --color-verified:       #2C5E3F;
+    --color-tampered:       #8C2A1C;
+    --color-chain-live:     #9A772C;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Space Grotesk', sans-serif; background: #fff; -webkit-font-smoothing: antialiased; }
+
+  @keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0} }
+  @keyframes brass-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  @keyframes scan    { from{top:0} to{top:100%} }
+  @keyframes stamp-in{ 0%{transform:scaleX(0)} 100%{transform:scaleX(1)} }
+  @keyframes fade-up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes hard-in { 0%{opacity:0} 1%{opacity:1} 100%{opacity:1} }
+
+  .cursor::after { content:'_'; animation: blink .9s step-end infinite; }
+  .chain-pulse   { animation: brass-pulse 2s ease-in-out infinite; }
+  .scan-line     { position:absolute;left:0;right:0;height:2px;background:var(--color-verified);animation:scan 1.1s linear forwards; }
+  .stamp-bar     { transform-origin:left; animation:stamp-in .07s steps(1,end) forwards; }
+  .fade-up       { animation: fade-up .18s ease forwards; }
+  .hard-in       { animation: hard-in .05s steps(1,end) forwards; }
+
+  /* hide scrollbar on ledger */
+  .no-scroll::-webkit-scrollbar { display:none; }
+  .no-scroll { -ms-overflow-style:none; scrollbar-width:none; }
+
+  /* vertical writing for sidebar */
+  .vert-lr { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
+
+  input, select {
+    background: transparent;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input::placeholder { opacity: .3; }
+  input:focus, select:focus { outline: none; }
+
+  /* Tailwind custom values we can't do inline */
+  .tracking-widest-2 { letter-spacing: .2em; }
+  .tracking-widest-15 { letter-spacing: .15em; }
+  .tracking-widest-12 { letter-spacing: .12em; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const { useState, useEffect, useRef, useCallback } = React;
+const h = React.createElement;
+
+/* ── colour tokens via inline style shorthand ── */
+const T = {
+  accent:    'var(--color-accent)',
+  verified:  'var(--color-verified)',
+  tampered:  'var(--color-tampered)',
+  chainLive: 'var(--color-chain-live)',
+  bg:        'var(--color-bg-base)',
+  text:      'var(--color-text-primary)',
+};
+
+/* ── SHA-256 ── */
+async function sha256(file) {
+  const buf = await file.arrayBuffer();
+  const hb  = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hb)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ── particle canvas ── */
+function useParticleField(ref, hash) {
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf, t = 0;
+    const seed = hash || '0'.repeat(64);
+    const pts = Array.from({length:256},(_,i)=>{
+      const v = parseInt(seed.slice((i*2)%62,(i*2)%62+2)||'ff',16)/255;
+      const a = (i/256)*Math.PI*2*7 + v*Math.PI;
+      const r = .18 + v*.32;
+      return { x:Math.cos(a)*r, y:Math.sin(a)*r*.6, z:(i/256)*2-1, size:1+v*2.2, speed:.0003+v*.0004 };
+    });
+    function resize(){
+      canvas.width  = canvas.offsetWidth  * devicePixelRatio;
+      canvas.height = canvas.offsetHeight * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+    }
+    function draw(){
+      const W = canvas.offsetWidth, H = canvas.offsetHeight;
+      ctx.clearRect(0,0,W,H);
+      t += .004;
+      pts.forEach(p=>{
+        const ct=Math.cos(t*p.speed*300), st=Math.sin(t*p.speed*300);
+        const x3=p.x*ct-p.z*.3*st, z3=p.x*st*.3+p.z*ct;
+        const sc=1/(1-z3*.4+.001);
+        const sx=W/2+x3*W*.42*sc, sy=H/2+p.y*H*.45*sc;
+        const alpha=Math.max(0,Math.min(1,(z3+1)*.5));
+        ctx.fillStyle = `rgba(0,0,0,${alpha*.65})`;
+        ctx.beginPath();
+        ctx.arc(sx,sy,p.size*sc*.55,0,Math.PI*2);
+        ctx.fill();
+      });
+      raf=requestAnimationFrame(draw);
+    }
+    resize();
+    window.addEventListener('resize',resize);
+    draw();
+    return ()=>{ cancelAnimationFrame(raf); window.removeEventListener('resize',resize); };
+  },[ref,hash]);
+}
+
+/* ── typewriter ── */
+function useTypewriter(text,speed=24){
+  const [out,setOut]=useState('');
+  useEffect(()=>{
+    setOut('');
+    let i=0;
+    const id=setInterval(()=>{ i++; setOut(text.slice(0,i)); if(i>=text.length)clearInterval(id); },speed);
+    return ()=>clearInterval(id);
+  },[text,speed]);
+  return out;
+}
+
+/* ─────────────────────────────────────────────
+   SHARED: HASH DISPLAY
+───────────────────────────────────────────── */
+function HashDisplay({value, label, highlight}){
+  const col = highlight==='verified' ? T.verified : highlight==='tampered' ? T.tampered : T.text;
+  return h('div',{style:{borderBottom:`2px solid ${T.text}`,paddingBottom:8,marginBottom:8}},
+    label && h('span',{style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.5,marginBottom:4}},label),
+    h('span',{style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:11,wordBreak:'break-all',lineHeight:1.4,color:col}}, value||'—')
+  );
+}
+
+/* ─────────────────────────────────────────────
+   NAV
+───────────────────────────────────────────── */
+function Nav({surface, onSwitch, authState, walletAddr}){
+  return h('nav',{
+    style:{
+      position:'fixed',top:0,left:0,right:0,zIndex:50,
+      display:'flex',alignItems:'center',justifyContent:'space-between',
+      padding:'16px 24px',
+      borderBottom:`2px solid ${T.text}`,
+      background:T.bg,
+    }
+  },
+    h('div',{style:{display:'flex',alignItems:'center',gap:20}},
+      h('button',{
+        onClick:onSwitch,
+        style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:22,letterSpacing:'-.03em',
+               lineHeight:1,background:'none',border:'none',cursor:'pointer',color:T.text}
+      }, surface==='attesta'?'ATTESTA':'LEXIVAULT'),
+      h('span',{style:{
+        fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',
+        letterSpacing:'.2em',border:`1px solid ${T.text}`,padding:'4px 8px',opacity:.45
+      }}, surface==='attesta'?'Register of Record':'Zero-Trust Conveyancing')
+    ),
+    h('div',{style:{display:'flex',alignItems:'center',gap:16}},
+      h('span',{style:{display:'flex',alignItems:'center',gap:6,fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.15em'}},
+        h('span',{className:'chain-pulse',style:{display:'inline-block',width:8,height:8,borderRadius:'50%',background:T.chainLive}}),
+        h('span',{style:{color:T.chainLive}},'Sui Testnet')
+      ),
+      authState==='connected' && walletAddr
+        ? h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,border:`2px solid ${T.text}`,padding:'4px 10px'}},
+            walletAddr.slice(0,6)+'…'+walletAddr.slice(-4))
+        : h('button',{
+            style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,textTransform:'uppercase',
+                   letterSpacing:'.12em',border:`2px solid ${T.accent}`,padding:'6px 14px',
+                   color:T.accent,background:'none',cursor:'pointer'}
+          }, authState==='connecting'?'Connecting…':'Connect')
+    )
+  );
+}
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+function AttestaHero({onEnter}){
+  const canvasRef=useRef(null);
+  const DEMO='a3f8c2d1e04b7691f2e8a0c3d5b6e791f0a4c2d3e5f6a7b8c9d0e1f2a3b4c5d6';
+  const typed=useTypewriter(DEMO,16);
+  useParticleField(canvasRef,DEMO);
+
+  return h('section',{style:{position:'relative',minHeight:'100vh',paddingTop:80,display:'flex',flexDirection:'column'}},
+    h('canvas',{ref:canvasRef,style:{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',opacity:.1}}),
+
+    h('div',{style:{position:'relative',zIndex:1,flex:1,display:'flex',flexDirection:'column',justifyContent:'center',
+                    padding:'0 clamp(24px,6vw,80px)',maxWidth:1400,margin:'0 auto',width:'100%'}},
+      /* top rule */
+      h('div',{style:{width:'100%',height:3,background:'#000',marginBottom:32}}),
+
+      /* display heading */
+      h('h1',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,lineHeight:.9,letterSpacing:'-.04em',color:'#000',textTransform:'uppercase',margin:0}},
+        h('span',{style:{display:'block',fontSize:'clamp(64px,11vw,152px)'}},'Proof'),
+        h('span',{style:{display:'block',fontSize:'clamp(64px,11vw,152px)',marginLeft:'clamp(24px,6vw,112px)',color:T.accent}},'a document'),
+        h('span',{style:{display:'block',fontSize:'clamp(64px,11vw,152px)'}},'existed.')
+      ),
+
+      /* rule */
+      h('div',{style:{display:'flex',alignItems:'center',margin:'40px 0'}},
+        h('div',{style:{height:2,background:'#000',flex:1}}),
+        h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',
+                          letterSpacing:'.25em',padding:'8px 16px',borderTop:'2px solid #000',borderBottom:'2px solid #000'}},
+          'SHA-256 · Sui · Walrus'),
+        h('div',{style:{height:2,background:'#000',flex:1}})
+      ),
+
+      /* hash + CTAs */
+      h('div',{style:{display:'flex',flexWrap:'wrap',gap:40,alignItems:'flex-start'}},
+        h('div',{style:{flex:'1 1 340px',minWidth:0}},
+          h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',
+                         letterSpacing:'.2em',marginBottom:10,opacity:.45}},'Live fingerprint'),
+          h('p',{className:'cursor',style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'clamp(10px,1.2vw,13px)',
+                                            wordBreak:'break-all',lineHeight:1.5}},typed),
+          h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontSize:14,marginTop:20,maxWidth:440,lineHeight:1.6,opacity:.55}},
+            'The document never leaves this device. Only the fingerprint, time, and a reference are anchored on-chain.')
+        ),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:10,minWidth:200}},
+          h('button',{onClick:onEnter,style:{
+            fontFamily:"'IBM Plex Mono',monospace",fontSize:12,textTransform:'uppercase',letterSpacing:'.12em',
+            background:'#000',color:'#fff',border:'2px solid #000',padding:'18px 28px',cursor:'pointer',textAlign:'left'
+          }},'Seal a document →'),
+          h('button',{onClick:onEnter,style:{
+            fontFamily:"'IBM Plex Mono',monospace",fontSize:12,textTransform:'uppercase',letterSpacing:'.12em',
+            background:'#fff',color:'#000',border:'2px solid #000',padding:'18px 28px',cursor:'pointer',textAlign:'left'
+          }},'Verify a seal →')
+        )
+      )
+    ),
+
+    h('div',{style:{position:'relative',zIndex:1,padding:'0 clamp(24px,6vw,80px) 32px'}},
+      h('div',{style:{height:2,background:'#000',marginBottom:12}}),
+      h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.35}},
+        'Scroll to workspace ↓')
+    )
+  );
+}
+
+/* ─────────────────────────────────────────────
+   SEAL WORKSPACE
+───────────────────────────────────────────── */
+function SealWorkspace(){
+  const [file,setFile]=useState(null);
+  const [hash,setHash]=useState('');
+  const [state,setState]=useState('idle'); // idle | hashing | sealing | done
+  const [ref,setRef]=useState('');
+  const [client,setClient]=useState('');
+  const [epochs,setEpochs]=useState('53');
+  const canvasRef=useRef(null);
+  useParticleField(canvasRef,hash);
+
+  const handleFile=useCallback(async f=>{
+    setFile(f); setState('hashing');
+    const h=await sha256(f);
+    setHash(h); setState('idle');
+  },[]);
+
+  const handleSeal=()=>{ setState('sealing'); setTimeout(()=>setState('done'),2200); };
+
+  const stateLabel={idle:file?'Ready':'No document',hashing:'Fingerprinting…',sealing:'Anchoring on Sui…',done:'Sealed'}[state];
+  const stateColor=state==='done'?T.verified:T.text;
+
+  return h('section',{style:{minHeight:'100vh',paddingTop:80,padding:'80px clamp(24px,6vw,80px) 60px',maxWidth:1400,margin:'0 auto'}},
+    /* header */
+    h('div',{style:{borderTop:'4px solid #000',paddingTop:32,marginBottom:40,display:'flex',alignItems:'baseline',justifyContent:'space-between'}},
+      h('h2',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:'clamp(36px,6vw,80px)',letterSpacing:'-.03em',textTransform:'uppercase',lineHeight:.9}},'Seal'),
+      h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,textTransform:'uppercase',letterSpacing:'.18em',
+                        border:`2px solid ${stateColor}`,padding:'4px 10px',color:stateColor}},stateLabel)
+    ),
+
+    h('div',{style:{display:'grid',gridTemplateColumns:'1fr 2px 1.2fr',gap:0}},
+      /* LEFT */
+      h('div',{style:{paddingRight:40}},
+        /* drop zone */
+        h('div',{
+          onDrop:e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);},
+          onDragOver:e=>e.preventDefault(),
+          onClick:()=>document.getElementById('seal-file').click(),
+          style:{
+            border:`2px dashed ${file?T.verified:'#000'}`,padding:40,textAlign:'center',
+            cursor:'pointer',marginBottom:28,background:file?'rgba(44,94,63,.04)':'transparent'
+          }
+        },
+          h('input',{id:'seal-file',type:'file',style:{display:'none'},onChange:e=>e.target.files[0]&&handleFile(e.target.files[0])}),
+          file
+            ? h('div',{style:{textAlign:'left'}},
+                h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.15em',color:T.verified,marginBottom:6}},'Document loaded'),
+                h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:17}},file.name),
+                h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,marginTop:4,opacity:.4}},(file.size/1024).toFixed(1)+' KB')
+              )
+            : h('div',null,
+                h('div',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:52,lineHeight:1,marginBottom:12}},'↑'),
+                h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:14,textTransform:'uppercase',letterSpacing:'.08em'}},'Drop document here'),
+                h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,marginTop:6,opacity:.35}},'or click to browse · any file type')
+              )
+        ),
+
+        /* fields */
+        ...[
+          {id:'ref',label:'Public reference — published on-chain',ph:'Deed of Variation — Smith/2026',val:ref,set:setRef},
+          {id:'client',label:'Client — local only',ph:'Held on this device',val:client,set:setClient},
+        ].map(f=>h('div',{key:f.id,style:{marginBottom:16}},
+          h('label',{htmlFor:f.id,style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.55,marginBottom:6}},f.label),
+          h('input',{id:f.id,type:'text',value:f.val,onChange:e=>f.set(e.target.value),placeholder:f.ph,
+                      style:{width:'100%',borderBottom:'2px solid #000',fontFamily:"'Space Grotesk',sans-serif",fontSize:15,padding:'8px 0',color:T.text}})
+        )),
+
+        h('div',{style:{marginBottom:28}},
+          h('label',{style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.55,marginBottom:6}},'Retention period'),
+          h('select',{value:epochs,onChange:e=>setEpochs(e.target.value),
+                       style:{width:'100%',borderBottom:'2px solid #000',fontFamily:"'IBM Plex Mono',monospace",fontSize:12,padding:'8px 0',color:T.text,cursor:'pointer'}},
+            h('option',{value:'5'},'5 epochs (demo)'),
+            h('option',{value:'12'},'12 epochs'),
+            h('option',{value:'26'},'26 epochs'),
+            h('option',{value:'53'},'53 epochs (~1 year)')
+          )
+        ),
+
+        h('button',{
+          onClick:handleSeal,
+          disabled:!file||!ref||state==='sealing'||state==='done',
+          style:{
+            width:'100%',fontFamily:"'IBM Plex Mono',monospace",fontSize:12,textTransform:'uppercase',
+            letterSpacing:'.12em',padding:'18px 0',border:'2px solid',cursor:(!file||!ref||state==='sealing'||state==='done')?'not-allowed':'pointer',
+            opacity:(!file||!ref)?'.35':'1',
+            background:state==='done'?T.verified:'#000',
+            borderColor:state==='done'?T.verified:'#000',
+            color:'#fff',
+          }
+        }, state==='sealing'?'Anchoring on Sui…':state==='done'?'✓ Sealed':'Seal on Sui + Walrus →')
+      ),
+
+      /* divider */
+      h('div',{style:{background:'#000'}}),
+
+      /* RIGHT */
+      h('div',{style:{paddingLeft:40}},
+        h('div',{style:{position:'relative',height:300,border:'2px solid #000',marginBottom:28}},
+          h('canvas',{ref:canvasRef,style:{position:'absolute',inset:0,width:'100%',height:'100%'}}),
+          state==='done' && h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'flex-end',padding:12,gap:3}},
+            ...Array.from({length:14},(_,i)=>h('div',{
+              key:i,className:'stamp-bar',
+              style:{flex:1,background:T.accent,height:(22+Math.sin(i*.8)*38)+'%',animationDelay:(i*.04)+'s',opacity:.75}
+            }))
+          ),
+          h('div',{style:{position:'absolute',top:10,left:12,fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.15em',opacity:.35}},
+            hash?'Fingerprint visualised':'No document loaded')
+        ),
+
+        hash && h('div',{style:{borderTop:'2px solid #000',paddingTop:20}},
+          h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.45,marginBottom:16}},'Certificate'),
+          h(HashDisplay,{value:hash,label:'SHA-256 fingerprint'}),
+          state==='done' && h('div',{className:'hard-in'},
+            h(HashDisplay,{value:ref,label:'Reference (on-chain)'}),
+            h(HashDisplay,{value:new Date().toISOString(),label:'Sealed UTC'}),
+            h('div',{style:{marginTop:12,border:`2px solid ${T.verified}`,padding:'12px 16px'}},
+              h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,textTransform:'uppercase',letterSpacing:'.15em',color:T.verified}},'✓ Anchored on Sui Testnet')
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
+/* ─────────────────────────────────────────────
+   VERIFY
+───────────────────────────────────────────── */
+function VerifyPanel(){
+  const [file,setFile]=useState(null);
+  const [computed,setComputed]=useState('');
+  const [certId,setCertId]=useState('');
+  const [scanning,setScanning]=useState(false);
+  const [result,setResult]=useState('none'); // none | verified | tampered
+  const SEALED='a3f8c2d1e04b7691f2e8a0c3d5b6e791f0a4c2d3e5f6a7b8c9d0e1f2a3b4c5d6';
+
+  const handleFile=async f=>{ setFile(f); setResult('none'); setComputed(await sha256(f)); };
+  const handleVerify=()=>{
+    if(!computed||!certId) return;
+    setScanning(true);
+    setTimeout(()=>{ setScanning(false); setResult(certId.includes('demo')?'verified':'tampered'); },1100);
+  };
+
+  const rc=result==='verified'?T.verified:result==='tampered'?T.tampered:'#000';
+
+  return h('section',{style:{minHeight:'100vh',paddingTop:80,padding:'80px clamp(24px,6vw,80px) 60px',maxWidth:1400,margin:'0 auto'}},
+    h('div',{style:{borderTop:'4px solid #000',paddingTop:32,marginBottom:40}},
+      h('h2',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:'clamp(36px,6vw,80px)',letterSpacing:'-.03em',textTransform:'uppercase',lineHeight:.9}},'Verify')
+    ),
+
+    h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 2px'}},
+      /* computed */
+      h('div',{style:{borderRight:'2px solid #000',paddingRight:40}},
+        h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.45,marginBottom:20}},'This file'),
+        h('div',{
+          onDrop:e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);},
+          onDragOver:e=>e.preventDefault(),
+          onClick:()=>document.getElementById('verify-file').click(),
+          style:{border:'2px dashed #000',padding:32,cursor:'pointer',marginBottom:20,background:file?'rgba(44,94,63,.04)':'transparent',borderColor:file?T.verified:'#000'}
+        },
+          h('input',{id:'verify-file',type:'file',style:{display:'none'},onChange:e=>e.target.files[0]&&handleFile(e.target.files[0])}),
+          file
+            ? h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700}},file.name)
+            : h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,textTransform:'uppercase',letterSpacing:'.15em',opacity:.35}},'Drop file to fingerprint')
+        ),
+        computed && h('div',{style:{position:'relative'}},
+          scanning && h('div',{className:'scan-line'}),
+          h(HashDisplay,{value:computed,label:'Computed SHA-256',highlight:result!=='none'?result:undefined})
+        )
+      ),
+
+      /* sealed */
+      h('div',{style:{paddingLeft:40}},
+        h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.45,marginBottom:20}},'Sealed record'),
+        h('div',{style:{marginBottom:20}},
+          h('label',{style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.55,marginBottom:6}},'Certificate ID'),
+          h('input',{type:'text',value:certId,onChange:e=>{setCertId(e.target.value);setResult('none');},
+                      placeholder:"0x… or type 'demo' to match",
+                      style:{width:'100%',borderBottom:'2px solid #000',fontFamily:"'IBM Plex Mono',monospace",fontSize:12,padding:'8px 0',color:T.text}})
+        ),
+        certId && h(HashDisplay,{value:SEALED,label:"Sealed SHA-256 (from Sui)",highlight:result!=='none'?result:undefined}),
+
+        h('button',{
+          onClick:handleVerify,
+          disabled:!computed||!certId||scanning,
+          style:{width:'100%',fontFamily:"'IBM Plex Mono',monospace",fontSize:12,textTransform:'uppercase',
+                  letterSpacing:'.12em',background:'#000',color:'#fff',border:'2px solid #000',padding:'18px 0',
+                  cursor:(!computed||!certId||scanning)?'not-allowed':'pointer',opacity:(!computed||!certId)?'.35':'1',marginTop:8}
+        }, scanning?'Scanning…':'Verify seal →'),
+
+        result!=='none' && h('div',{className:'hard-in',style:{marginTop:20,border:`4px solid ${rc}`,padding:'20px 24px'}},
+          h('p',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:'clamp(28px,4vw,52px)',letterSpacing:'-.02em',textTransform:'uppercase',color:rc}},
+            result==='verified'?'✓ Intact':'✕ Tampered'),
+          h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontSize:13,marginTop:8,opacity:.65,lineHeight:1.6}},
+            result==='verified'
+              ?'Fingerprints match. The document is unaltered since sealing.'
+              :'Fingerprints differ. One or more bytes changed after the seal.')
+        )
+      )
+    )
+  );
+}
+
+/* ─────────────────────────────────────────────
+   REGISTER LEDGER
+───────────────────────────────────────────── */
+const DEMO_ROWS=[
+  {id:'CERT-0001',ref:'Deed of Variation — Smith/2026',fp:'a3f8c2d1e04b7691…',ts:'2026-06-20T09:14Z',sui:'0x4aef…c221'},
+  {id:'CERT-0002',ref:'Completion Statement — Patel/2026',fp:'b91fc0e3a24d7852…',ts:'2026-06-19T16:42Z',sui:'0x7bcd…a310'},
+  {id:'CERT-0003',ref:'Expert Report — Marchetti v Crown',fp:'c04e9f1a2b3d4e5f…',ts:'2026-06-18T11:05Z',sui:'0x2fa1…d99e'},
+  {id:'CERT-0004',ref:'Title Register — Pemberton/2026',fp:'d15fa0b2c3d4e5f6…',ts:'2026-06-17T08:30Z',sui:'0x9ef2…b005'},
+];
+
+function RegisterLedger(){
+  const [hovered,setHovered]=useState(null);
+  return h('section',{style:{minHeight:'100vh',paddingTop:80,padding:'80px clamp(24px,6vw,80px) 60px',maxWidth:1400,margin:'0 auto'}},
+    h('div',{style:{borderTop:'4px solid #000',paddingTop:32,marginBottom:40,display:'flex',alignItems:'baseline',gap:20}},
+      h('h2',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:'clamp(36px,6vw,80px)',letterSpacing:'-.03em',textTransform:'uppercase',lineHeight:.9}},'Register'),
+      h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,textTransform:'uppercase',letterSpacing:'.15em',opacity:.35}},DEMO_ROWS.length+' records')
+    ),
+
+    h('div',{className:'no-scroll',style:{overflowX:'auto'}},
+      h('table',{style:{width:'100%',minWidth:860,borderCollapse:'collapse'}},
+        h('thead',null,
+          h('tr',{style:{borderBottom:'2px solid #000'}},
+            ...['Certificate','Reference','Fingerprint','Sealed UTC','Sui object',''].map(col=>
+              h('th',{key:col,style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',
+                                      letterSpacing:'.2em',textAlign:'left',padding:'10px 16px 10px 0',opacity:.4}},col)
+            )
+          )
+        ),
+        h('tbody',null,
+          DEMO_ROWS.map(row=>
+            h('tr',{key:row.id,
+                    onMouseEnter:()=>setHovered(row.id),
+                    onMouseLeave:()=>setHovered(null),
+                    style:{borderBottom:`1px solid rgba(0,0,0,${hovered===row.id?.9:.15})`}},
+              h('td',{style:{padding:'16px 16px 16px 0'}},
+                h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:12,fontWeight:700}},row.id)),
+              h('td',{style:{padding:'16px 16px 16px 0'}},
+                h('span',{style:{fontFamily:"'Space Grotesk',sans-serif",fontSize:14}},row.ref)),
+              h('td',{style:{padding:'16px 16px 16px 0'}},
+                h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,opacity:.5}},row.fp)),
+              h('td',{style:{padding:'16px 16px 16px 0'}},
+                h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11}},row.ts)),
+              h('td',{style:{padding:'16px 16px 16px 0'}},
+                h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,textDecoration:'underline',color:T.accent,cursor:'pointer'}},row.sui)),
+              h('td',{style:{padding:'16px 0'}},
+                h('button',{
+                  style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.12em',
+                          border:'1px solid #000',padding:'6px 12px',background:'none',cursor:'pointer',
+                          opacity:hovered===row.id?1:0,transition:'none'}
+                },'Re-verify')
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
+/* ─────────────────────────────────────────────
+   VAULT GATE (LexiVault dark surface)
+───────────────────────────────────────────── */
+function VaultGate({onUnlock}){
+  const [step,setStep]=useState('gate');
+  const typed=useTypewriter(step==='connecting'?'Requesting wallet signature… stand by.':'',22);
+
+  if(step==='connecting'){
+    return h('div',{'data-surface':'vault',
+                    style:{minHeight:'100vh',paddingTop:80,display:'flex',alignItems:'center',justifyContent:'center',padding:24,
+                           background:T.bg,color:T.text}},
+      h('div',{style:{maxWidth:520,width:'100%'}},
+        h('div',{style:{borderBottom:'2px solid #fff',paddingBottom:16,marginBottom:16}},
+          h('p',{className:'cursor',style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,letterSpacing:'.15em',opacity:.55,marginBottom:20}},typed),
+          h('div',{className:'chain-pulse',style:{height:2,width:'100%',background:T.chainLive}})
+        ),
+        h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.25}},'Zero-trust handshake · Sui testnet')
+      )
+    );
+  }
+
+  return h('div',{'data-surface':'vault',
+                  style:{minHeight:'100vh',paddingTop:80,display:'flex',flexDirection:'column',background:'#000',color:'#fff'}},
+    h('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}},
+      h('div',{style:{maxWidth:680,width:'100%'}},
+        /* gate header */
+        h('div',{style:{borderTop:'2px solid #fff',borderBottom:'2px solid #fff',padding:'28px 0',marginBottom:40}},
+          h('h2',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:'clamp(48px,8vw,108px)',
+                          letterSpacing:'-.03em',textTransform:'uppercase',lineHeight:.9,color:'#fff',margin:0}},
+            'Vault',h('br'),h('span',{style:{color:T.accent}},'Gate')
+          )
+        ),
+
+        h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontSize:14,marginBottom:32,opacity:.55,lineHeight:1.65}},
+          'LexiVault holds privileged matter data. Authenticate with a zero-trust credential before any content is revealed. The server sees only a proof — never your identity or the documents.'),
+
+        /* auth options */
+        h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+          /* wallet */
+          h('button',{
+            onClick:()=>{setStep('connecting');setTimeout(()=>onUnlock('Sui Wallet'),2800);},
+            style:{width:'100%',textAlign:'left',border:'2px solid #fff',padding:'18px 20px',
+                    display:'flex',alignItems:'center',justifyContent:'space-between',
+                    background:'transparent',color:'#fff',cursor:'pointer'}
+          },
+            h('span',null,
+              h('span',{style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.15em',opacity:.35,marginBottom:4}},'Option 1'),
+              h('span',{style:{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:20}},'Connect Wallet')
+            ),
+            h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.12em',
+                              border:`1px solid ${T.accent}`,padding:'4px 10px',color:T.accent}},'Sui →')
+          ),
+          /* zkLogin */
+          h('button',{
+            onClick:()=>onUnlock('zkLogin'),
+            style:{width:'100%',textAlign:'left',border:'2px solid #fff',padding:'18px 20px',
+                    display:'flex',alignItems:'center',justifyContent:'space-between',
+                    background:'transparent',color:'#fff',cursor:'pointer'}
+          },
+            h('span',null,
+              h('span',{style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.15em',opacity:.35,marginBottom:4}},'Option 2'),
+              h('span',{style:{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:20}},'zkLogin')
+            ),
+            h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,opacity:.3}},'Zero-knowledge OAuth →')
+          ),
+          /* OAuth */
+          h('div',{style:{border:'2px solid #fff',padding:'18px 20px'}},
+            h('span',{style:{display:'block',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.15em',opacity:.35,marginBottom:12}},'Option 3 — OAuth'),
+            h('div',{style:{display:'flex',gap:10}},
+              ...['Google','Apple'].map(p=>
+                h('button',{key:p,onClick:()=>onUnlock(p),
+                              style:{flex:1,border:'1px solid #fff',padding:'12px',fontFamily:"'IBM Plex Mono',monospace",
+                                      fontSize:12,textTransform:'uppercase',letterSpacing:'.12em',
+                                      background:'transparent',color:'#fff',cursor:'pointer'}},p)
+              )
+            )
+          )
+        ),
+
+        h('p',{style:{marginTop:24,fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.18em',opacity:.2}},
+          'No account stored · No document uploaded · Auth proof only')
+      )
+    )
+  );
+}
+
+/* ─────────────────────────────────────────────
+   VAULT PORTAL (post-auth)
+───────────────────────────────────────────── */
+function VaultPortal({method}){
+  return h('div',{'data-surface':'vault',style:{minHeight:'100vh',paddingTop:80,padding:'80px clamp(24px,6vw,80px) 60px',maxWidth:1400,margin:'0 auto',background:'#000',color:'#fff'}},
+    h('div',{style:{borderTop:`2px solid ${T.chainLive}`,paddingTop:28,marginBottom:40}},
+      h('div',{style:{display:'flex',alignItems:'baseline',gap:20,marginBottom:8,flexWrap:'wrap'}},
+        h('h2',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:'clamp(36px,6vw,72px)',letterSpacing:'-.03em',textTransform:'uppercase',lineHeight:.9,color:'#fff'}},'LexiVault'),
+        h('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.18em',
+                          border:`1px solid ${T.chainLive}`,padding:'4px 8px',color:T.chainLive}},'✓ via '+method)
+      ),
+      h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontSize:13,opacity:.35}},'Zero-trust conveyancing portal · privileged matter documents')
+    ),
+
+    h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',borderTop:'2px solid rgba(255,255,255,.1)'}},
+      ...['Active matters','Pending completion','Archived'].map((label,i)=>
+        h('div',{key:label,style:{padding:'32px',borderRight:i<2?'2px solid rgba(255,255,255,.1)':'none'}},
+          h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.3,marginBottom:16}},label),
+          h('p',{style:{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:'clamp(52px,7vw,88px)',lineHeight:1,
+                          color:i===1?T.accent:'#fff'}},[4,1,12][i])
+        )
+      )
+    ),
+
+    h('div',{style:{marginTop:32,border:'2px solid rgba(255,255,255,.1)',padding:'28px'}},
+      h('p',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,textTransform:'uppercase',letterSpacing:'.2em',opacity:.3,marginBottom:10}},'Session'),
+      h('p',{style:{fontFamily:"'Space Grotesk',sans-serif",fontSize:13,opacity:.35,lineHeight:1.65}},
+        'Conveyancing portal loads here. Seal / verify / register surfaces replicate inside the vault with firm-specific branding and matter-level access control.')
+    )
+  );
+}
+
+/* ─────────────────────────────────────────────
+   MOBILE NAV
+───────────────────────────────────────────── */
+function MobileNav({active,onNav,surface}){
+  const tabs=surface==='attesta'
+    ?[{id:'hero',l:'Home'},{id:'seal',l:'Seal'},{id:'verify',l:'Verify'},{id:'register',l:'Reg'}]
+    :[{id:'vault',l:'Vault'}];
+  return h('nav',{
+    style:{position:'fixed',bottom:0,left:0,right:0,zIndex:50,display:'flex',
+            borderTop:`2px solid ${T.text}`,background:T.bg}
+  },
+    tabs.map(t=>h('button',{key:t.id,onClick:()=>onNav(t.id),
+                              style:{flex:1,padding:'14px 0',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,
+                                      textTransform:'uppercase',letterSpacing:'.15em',background:'none',
+                                      border:'none',borderRight:`1px solid ${T.text}`,cursor:'pointer',
+                                      color:active===t.id?T.accent:T.text,opacity:active===t.id?1:.4}},t.l))
+  );
+}
+
+/* ─────────────────────────────────────────────
+   DESKTOP SIDEBAR
+───────────────────────────────────────────── */
+function Sidebar({active,onNav}){
+  const items=[{id:'hero',l:'Home'},{id:'seal',l:'Seal'},{id:'verify',l:'Verify'},{id:'register',l:'Register'}];
+  return h('aside',{
+    style:{position:'fixed',left:0,top:'50%',transform:'translateY(-50%)',zIndex:40,
+            display:'flex',flexDirection:'column',borderRight:'2px solid #000'}
+  },
+    items.map(item=>h('button',{key:item.id,onClick:()=>onNav(item.id),
+                                  className:'vert-lr',
+                                  style:{
+                                    padding:'18px 12px',fontFamily:"'IBM Plex Mono',monospace",fontSize:10,
+                                    textTransform:'uppercase',letterSpacing:'.2em',
+                                    borderBottom:'2px solid #000',background:active===item.id?'#000':'#fff',
+                                    color:active===item.id?T.accent:T.text,cursor:'pointer',border:'none',
+                                    borderRight:'none',borderBottom:'2px solid #000',
+                                  }},item.l))
+  );
+}
+
+/* ─────────────────────────────────────────────
+   ROOT
+───────────────────────────────────────────── */
+function App(){
+  const [surface,setSurface]=useState('attesta');
+  const [panel,setPanel]=useState('hero');
+  const [authState,setAuthState]=useState('none');
+  const [walletAddr,setWalletAddr]=useState('');
+  const [vaultUnlocked,setVaultUnlocked]=useState(false);
+  const [vaultMethod,setVaultMethod]=useState('');
+
+  const switchSurface=()=>{
+    const next=surface==='attesta'?'vault':'attesta';
+    setSurface(next);
+    setPanel(next==='vault'?'vault':'hero');
+  };
+
+  const handleUnlock=method=>{
+    setVaultMethod(method); setVaultUnlocked(true);
+    setAuthState('connected');
+    setWalletAddr('0x'+Math.random().toString(16).slice(2,14));
+    setPanel('vault');
+  };
+
+  const renderPanel=()=>{
+    if(surface==='vault') return vaultUnlocked?h(VaultPortal,{method:vaultMethod}):h(VaultGate,{onUnlock:handleUnlock});
+    switch(panel){
+      case 'hero':     return h(AttestaHero,{onEnter:()=>setPanel('seal')});
+      case 'seal':     return h(SealWorkspace);
+      case 'verify':   return h(VerifyPanel);
+      case 'register': return h(RegisterLedger);
+      default:         return h(AttestaHero,{onEnter:()=>setPanel('seal')});
+    }
+  };
+
+  return h('div',{
+    'data-surface':surface==='vault'?'vault':undefined,
+    style:{background:T.bg,color:T.text,minHeight:'100vh',paddingBottom:60}
+  },
+    h(Nav,{surface,onSwitch:switchSurface,authState,walletAddr}),
+    surface==='attesta' && h(Sidebar,{active:panel,onNav:setPanel}),
+    h('main',{style:{paddingLeft:surface==='attesta'?52:0}},renderPanel()),
+    h(MobileNav,{active:panel,onNav:setPanel,surface})
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

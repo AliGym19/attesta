@@ -1,0 +1,15 @@
+# Next.js
+web_app/.next/
+web_app/out/
+web_app/node_modules/
+web_app/.env.local
+
+# Move build artifacts (only sources are needed)
+move_vault/build/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*

@@ -1,0 +1,10 @@
+[package]
+name = "attesta"
+edition = "2024.beta"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+
+[addresses]
+attesta = "0x0"
+lexivault = "0x0"
