@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0; padding:0}
+  body{background:#1E150F; color:#F4EADB; font-family:"Cormorant Garamond",Georgia,serif; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+  ::selection{background:#8B4E2F; color:#F4EADB}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @keyframes pulsedot{0%,100%{opacity:1}50%{opacity:.2}}
+  @keyframes scanin{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+  @keyframes floatdown{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  @keyframes spinslow{to{transform:rotate(360deg)}}
+  @keyframes spinrev{to{transform:rotate(-360deg)}}
+  @keyframes vscan{0%{transform:translateY(-46px)}100%{transform:translateY(46px)}}
+  @keyframes hexdepth{0%,100%{transform:scale(.86);opacity:.18}50%{transform:scale(1.08)}}
+  input::placeholder{color:rgba(244,234,219,.3)}
+  input:-webkit-autofill{-webkit-text-fill-color:#F4EADB; -webkit-box-shadow:0 0 0 1000px #2A1D13 inset}
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#1E150F; color:#F4EADB; font-family:'Cormorant Garamond',Georgia,serif; position:relative; overflow-x:hidden">
+
+  <!-- ============ SITE ENTRY GATE ============ -->
+  <sc-if value="{{ siteLocked }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh; display:flex; flex-direction:column; position:relative">
+    <canvas id="gatefield" style="position:absolute; inset:0; width:100%; height:100%; opacity:.8; pointer-events:none"></canvas>
+    <div style="position:relative; display:flex; justify-content:space-between; align-items:center; padding:26px clamp(20px,5vw,56px)">
+      <span></span>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.24em; color:rgba(244,234,219,.5)">REGISTER OF RECORD</span>
+    </div>
+    <div style="position:relative; flex:1; display:grid; grid-template-columns:1.25fr .75fr">
+      <div style="padding:clamp(34px,6vw,86px) clamp(20px,5vw,64px); display:flex; flex-direction:column; justify-content:center">
+        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(54px,9.5vw,128px); line-height:.94; letter-spacing:-.02em; margin:0; max-width:14ch">All the proof<br><span style="font-style:italic">you</span> need</h1>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,26px); line-height:1.4; color:rgba(244,234,219,.5); max-width:46ch; margin:28px 0 0; font-style:italic">The files themselves never leave your device.</p>
+        <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.06em; margin:clamp(30px,4vw,46px) 0 0; color:rgba(244,234,219,.5); word-break:break-all; max-width:60ch"><span style="color:#D5B95C">LIVE FINGERPRINT » </span><span id="gate-hash"></span><span style="animation:blink 1s steps(1) infinite">▌</span></p>
+      </div>
+      <div style="padding:clamp(30px,4vw,56px) clamp(22px,4vw,48px); display:flex; flex-direction:column; justify-content:center; background:transparent">
+        <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.24em; color:rgba(244,234,219,.5); margin:0 0 22px">SIGN IN TO CONTINUE</p>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px">
+          <button onClick="{{ siteGoogle }}" style-hover="background:#F4EADB; color:#1E150F" style="display:flex; flex-direction:column; align-items:center; gap:9px; background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:18px 10px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.1em"><span style="font-family:'Cormorant Garamond',Georgia,serif; font-size:24px; font-weight:600; line-height:1">G</span>GOOGLE</button>
+          <button onClick="{{ siteMicrosoft }}" style-hover="background:#F4EADB; color:#1E150F" style="display:flex; flex-direction:column; align-items:center; gap:9px; background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:18px 10px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.1em"><span style="display:grid; grid-template-columns:1fr 1fr; gap:2px; width:18px; height:18px"><span style="background:currentColor"></span><span style="background:currentColor"></span><span style="background:currentColor"></span><span style="background:currentColor"></span></span>MICROSOFT</button>
+          <button onClick="{{ siteApple }}" style-hover="background:#F4EADB; color:#1E150F" style="display:flex; flex-direction:column; align-items:center; gap:9px; background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:18px 10px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.1em"><span style="font-size:22px; line-height:1"></span>APPLE</button>
+        </div>
+
+        <div style="margin-top:6px">
+          <label style="display:block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.16em; color:rgba(244,234,219,.5); margin-bottom:8px">FIRM EMAIL</label>
+          <input type="email" onInput="{{ onSiteEmail }}" placeholder="name@chambers.example" onFocus="{{ focusBrass }}" onBlur="{{ blurRule }}" style="width:100%; background:#1E150F; border:1px solid rgba(244,234,219,.16); color:#F4EADB; padding:13px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; outline:none; margin-bottom:14px" />
+          <label style="display:block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.16em; color:rgba(244,234,219,.5); margin-bottom:8px">PASSCODE</label>
+          <input type="password" onInput="{{ onSitePass }}" placeholder="••••••••••••" onFocus="{{ focusBrass }}" onBlur="{{ blurRule }}" style="width:100%; background:#1E150F; border:1px solid rgba(244,234,219,.16); color:#F4EADB; padding:13px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; outline:none; margin-bottom:16px" />
+          <button onClick="{{ siteLogin }}" disabled="{{ siteBtnDisabled }}" style-hover="background:#b8923f" style="width:100%; background:#D5B95C; color:#1E150F; border:0; padding:15px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.16em; font-weight:600">{{ siteBtnLabel }}</button>
+        </div>
+        <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.04em; color:#D5B95C; margin:14px 0 0; min-height:14px">{{ siteStatusLine }}</p>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ SITE ============ -->
+  <sc-if value="{{ siteUnlocked }}" hint-placeholder-val="{{ false }}">
+
+  <header style="position:sticky; top:0; z-index:30; background:#1E150F">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:0 clamp(18px,4vw,48px); min-height:60px; flex-wrap:wrap; gap:8px">
+      <div style="display:flex; align-items:baseline; gap:24px">
+        <button onClick="{{ goHome }}" style="background:transparent; border:0; color:#F4EADB; cursor:pointer; font-family:'Cormorant Garamond',Georgia,serif; font-weight:600; font-size:23px; letter-spacing:.02em; padding:0">Attesta</button>
+        <div style="display:flex; gap:0; font-family:'IBM Plex Mono',ui-monospace,monospace">
+          <button onClick="{{ goAttesta }}" style="position:relative; background:transparent; border:0; color:#F4EADB; cursor:pointer; padding:20px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em">REGISTER<sc-if value="{{ surfaceAttestaActive }}" hint-placeholder-val="{{ true }}"><span style="position:absolute; left:14px; right:14px; bottom:0; height:2px; background:#8B4E2F"></span></sc-if></button>
+          <button onClick="{{ goLexi }}" style="position:relative; background:transparent; border:0; color:#F4EADB; cursor:pointer; padding:20px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em">LEXIVAULT<sc-if value="{{ surfaceLexiActive }}" hint-placeholder-val="{{ false }}"><span style="position:absolute; left:14px; right:14px; bottom:0; height:2px; background:#8B4E2F"></span></sc-if></button>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.14em">
+        <span style="display:flex; align-items:center; gap:8px; color:rgba(244,234,219,.5)"><span style="width:7px; height:7px; border-radius:50%; background:#A36F3E; display:inline-block; animation:pulsedot 1.5s ease-in-out infinite"></span>SUI TESTNET</span>
+        <span style="color:rgba(244,234,219,.5)">{{ siteSessionLabel }}</span>
+        <button onClick="{{ siteLogout }}" style-hover="color:#C8503C; border-color:#C8503C" style="background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:7px 12px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.12em">SIGN OUT</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ATTESTA SURFACE -->
+  <sc-if value="{{ showAttesta }}" hint-placeholder-val="{{ true }}">
+  <main>
+    <div style="display:flex; border-bottom:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace; flex-wrap:wrap">
+      <button onClick="{{ goHero }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navHomeColor }}">HOME</button>
+      <button onClick="{{ goSeal }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navSealColor }}">SEAL</button>
+      <button onClick="{{ goVerify }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navVerifyColor }}">VERIFY</button>
+      <button onClick="{{ goRegister }}" style="background:transparent; border:0; padding:13px clamp(14px,3vw,24px); cursor:pointer; font-size:10px; letter-spacing:.16em; font-family:'IBM Plex Mono',ui-monospace,monospace; color:{{ navRegisterColor }}">REGISTER</button>
+    </div>
+
+    <!-- HERO -->
+    <sc-if value="{{ showHero }}" hint-placeholder-val="{{ true }}">
+    <section style="position:relative; border-bottom:1px solid rgba(244,234,219,.13); overflow:hidden">
+      <canvas id="hashfield2" style="position:absolute; inset:0; width:100%; height:100%; opacity:.85; pointer-events:none"></canvas>
+      <div style="position:relative; padding:clamp(40px,8vw,120px) clamp(20px,5vw,64px) clamp(48px,8vw,110px); max-width:1100px">
+        <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(48px,10vw,140px); line-height:.92; letter-spacing:-.02em; margin:0; max-width:15ch">Proof a document existed, <span style="font-style:italic; color:rgba(244,234,219,.5)">unaltered.</span></h1>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(19px,2.4vw,28px); line-height:1.4; max-width:42ch; margin:clamp(28px,4vw,44px) 0 0; color:rgba(244,234,219,.5)">A SHA-256 fingerprint frozen to Sui, the manifest stored on Walrus.</p>
+      </div>
+      <div style="position:relative; display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace">
+        <div style="padding:18px 20px; border-right:1px solid rgba(244,234,219,.13)"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">01 / DOCUMENT</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Hashed locally</div></div>
+        <div style="padding:18px 20px; border-right:1px solid rgba(244,234,219,.13)"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">02 / SUI</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">On-chain record</div></div>
+        <div style="padding:18px 20px"><div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:8px">03 / WALRUS</div><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:18px">Manifest ID</div></div>
+      </div>
+    </section>
+
+    <!-- SEAL — its own space -->
+    <section onClick="{{ goSeal }}" style-hover="background:#241811" style="position:relative; cursor:pointer; border-top:1px solid rgba(244,234,219,.13); padding:clamp(54px,9vw,128px) clamp(20px,5vw,64px); display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,6vw,80px); align-items:center; transition:background .25s">
+      <div>
+        <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.28em; color:#D5B95C; margin-bottom:22px">01 — CREATE A RECORD</div>
+        <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(40px,6.5vw,86px); line-height:.95; letter-spacing:-.02em; margin:0">Seal a document</h2>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,25px); line-height:1.45; max-width:40ch; margin:24px 0 0; color:rgba(244,234,219,.55)">Drop a file and Attesta fingerprints it in your browser. Only the hash, your reference and the moment in time are frozen to the chain — the file never moves.</p>
+        <div style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE SEALING DESK →</div>
+      </div>
+      <div style="display:flex; justify-content:center">
+        <svg viewBox="0 0 240 240" style="width:100%; max-width:300px; height:auto; overflow:visible">
+          <defs>
+            <linearGradient id="hexEdge" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#D5B95C"></stop>
+              <stop offset="0.5" stop-color="rgba(244,234,219,.5)"></stop>
+              <stop offset="1" stop-color="#5BA478"></stop>
+            </linearGradient>
+          </defs>
+          <g fill="none" stroke="url(#hexEdge)" style="transform-origin:120px 120px">
+            <polygon points="120,14 211,67 211,173 120,226 29,173 29,67" stroke-width="1" opacity=".16" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite"></polygon>
+            <polygon points="120,38 190,79 190,161 120,202 50,161 50,79" stroke-width="1" opacity=".28" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite; animation-delay:-1.4s"></polygon>
+            <polygon points="120,62 169,91 169,149 120,178 71,149 71,91" stroke-width="1.25" opacity=".5" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite; animation-delay:-2.8s"></polygon>
+            <polygon points="120,86 148,103 148,137 120,154 92,137 92,103" stroke-width="1.5" opacity=".85" style="transform-origin:120px 120px; animation:hexdepth 7s ease-in-out infinite; animation-delay:-4.2s"></polygon>
+          </g>
+          <circle cx="120" cy="120" r="3.5" fill="#D5B95C"></circle>
+        </svg>
+      </div>
+    </section>
+
+    <!-- VERIFY — its own space -->
+    <section onClick="{{ goVerify }}" style-hover="background:#241811" style="position:relative; cursor:pointer; border-top:1px solid rgba(244,234,219,.13); padding:clamp(54px,9vw,128px) clamp(20px,5vw,64px); display:grid; grid-template-columns:.95fr 1.05fr; gap:clamp(32px,6vw,80px); align-items:center; transition:background .25s">
+      <div style="display:flex; justify-content:center; order:0">
+        <svg viewBox="0 0 240 240" style="width:100%; max-width:300px; height:auto; overflow:visible">
+          <g fill="none" stroke-width="1">
+            <circle cx="120" cy="120" r="112" stroke="rgba(244,234,219,.07)"></circle>
+            <path d="M120 36 A84 84 0 0 1 120 204" stroke="rgba(91,164,120,.22)" stroke-width="1.5"></path>
+            <path d="M120 58 A62 62 0 0 1 120 182" stroke="rgba(244,234,219,.10)"></path>
+            <path d="M120 80 A40 40 0 0 1 120 160" stroke="rgba(91,164,120,.16)"></path>
+          </g>
+          <path d="M106 120 l10 11 l20 -25" fill="none" stroke="rgba(91,164,120,.55)" stroke-width="2.5" stroke-linecap="square"></path>
+          <g style="transform-origin:120px 120px; animation:vscan 2.8s ease-in-out infinite alternate">
+            <line x1="36" y1="120" x2="204" y2="120" stroke="rgba(213,185,92,.6)" stroke-width="1"></line>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.28em; color:#D5B95C; margin-bottom:22px">02 — PROVE A RECORD</div>
+        <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(40px,6.5vw,86px); line-height:.95; letter-spacing:-.02em; margin:0">Verify a seal</h2>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.2vw,25px); line-height:1.45; max-width:40ch; margin:24px 0 0; color:rgba(244,234,219,.55)">Re-hash any file against its certificate. Attesta scans the fingerprint nibble by nibble and tells you, beyond doubt, whether the document is unaltered since sealing.</p>
+        <div style="display:inline-flex; align-items:center; gap:10px; margin-top:38px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px">OPEN THE VERIFIER →</div>
+      </div>
+    </section>
+
+    <!-- REGISTER teaser -->
+    <section onClick="{{ goRegister }}" style-hover="background:#241811" style="cursor:pointer; border-top:1px solid rgba(244,234,219,.13); padding:clamp(40px,6vw,72px) clamp(20px,5vw,64px); display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; transition:background .25s">
+      <div style="display:flex; align-items:baseline; gap:20px; flex-wrap:wrap">
+        <span style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.28em; color:#D5B95C">03 — THE REGISTER</span>
+        <span style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(26px,3.4vw,40px); letter-spacing:-.01em">Every deed you’ve sealed, in one ledger</span>
+      </div>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.14em; color:#D5B95C; border-bottom:1px solid #D5B95C; padding-bottom:6px; white-space:nowrap">OPEN REGISTER →</span>
+    </section>
+    </sc-if>
+
+    <!-- SEAL -->
+    <sc-if value="{{ showSeal }}" hint-placeholder-val="{{ false }}">
+    <section style="display:grid; grid-template-columns:1.1fr .9fr">
+      <div style="border-right:1px solid rgba(244,234,219,.13); padding:clamp(22px,4vw,52px)">
+        <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(34px,5vw,64px); line-height:.95; letter-spacing:-.02em; margin:0 0 14px">Seal a document</h2>
+        <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; line-height:1.7; letter-spacing:.04em; margin:0 0 28px; max-width:44ch; color:rgba(244,234,219,.5)">FINGERPRINTED IN-BROWSER. ONLY THE HASH, A REFERENCE YOU CHOOSE, AND THE TIME ARE PUBLISHED.</p>
+        <div onClick="{{ pickSeal }}" onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" onDrop="{{ onSealDrop }}" id="seal-drop" style="border:1px solid rgba(244,234,219,.13); padding:clamp(26px,4vw,44px) 24px; text-align:center; cursor:pointer; background:#2A1D13">
+          <sc-if value="{{ sealHasFile }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; text-align:left">
+              <div style="overflow:hidden"><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:21px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ sealFileName }}</div><div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:#D5B95C; margin-top:6px">{{ sealFileMeta }}</div></div>
+              <span style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; border:1px solid #5BA478; color:#5BA478; padding:6px 10px; flex:none">SHA-256 ✓</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sealNoFile }}" hint-placeholder-val="{{ true }}">
+            <div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(22px,2.6vw,28px)">Drop file here</div>
+            <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.14em; margin-top:8px; color:rgba(244,234,219,.5)">OR CLICK TO BROWSE · NEVER UPLOADED</div>
+          </sc-if>
+        </div>
+        <input type="file" id="seal-input" onChange="{{ onSealInput }}" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none" />
+        <div style="margin-top:24px">
+          <label style="display:block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.16em; margin-bottom:8px; color:rgba(244,234,219,.5)">PUBLIC REFERENCE <span style="color:#D5B95C">— PUBLISHED</span></label>
+          <input type="text" onInput="{{ onRef }}" placeholder="Deed of Variation — Smith/2026" style="width:100%; border:1px solid rgba(244,234,219,.13); background:#2A1D13; padding:13px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; color:#F4EADB; outline:none" onFocus="{{ focusBrass }}" onBlur="{{ blurRule }}" />
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px">
+          <div><label style="display:block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.16em; margin-bottom:8px; color:rgba(244,234,219,.5)">CLIENT <span style="color:#8B4E2F">· LOCAL ONLY</span></label>
+            <input type="text" onInput="{{ onClient }}" placeholder="On this device" style="width:100%; border:1px solid rgba(244,234,219,.13); background:#2A1D13; padding:13px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; color:#F4EADB; outline:none" onFocus="{{ focusBrass }}" onBlur="{{ blurRule }}" /></div>
+          <div><label style="display:block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.16em; margin-bottom:8px; color:rgba(244,234,219,.5)">EPOCHS</label>
+            <select onChange="{{ onEpochs }}" style="width:100%; border:1px solid rgba(244,234,219,.13); background:#2A1D13; padding:13px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; color:#F4EADB; outline:none; appearance:none; border-radius:0">
+              <option value="5">5 — DEMO</option>
+              <option value="12">12 EPOCHS</option>
+              <option value="26">26 EPOCHS</option>
+              <option value="53">53 — ~1 YEAR</option>
+            </select></div>
+        </div>
+        <div style="height:6px; background:#2A1D13; border:1px solid rgba(244,234,219,.13); margin-top:28px">
+          <div style="height:100%; background:#8B4E2F; width: {{ sealProgressPct }}"></div>
+        </div>
+        <button onClick="{{ doSeal }}" disabled="{{ sealBtnDisabled }}" style-hover="background:#6F3D24" style="width:100%; margin-top:16px; background:#8B4E2F; color:#F4EADB; border:0; padding:18px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.16em">{{ sealBtnLabel }}</button>
+      </div>
+
+      <div style="padding:clamp(22px,4vw,52px); display:flex; flex-direction:column; min-height:480px">
+        <sc-if value="{{ certShown }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #5BA478; animation:scanin .35s steps(12) both">
+            <div style="background:#5BA478; color:#1E150F; padding:12px 16px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.16em; display:flex; justify-content:space-between"><span>CERTIFICATE FROZEN</span><span>SUI · IMMUTABLE</span></div>
+            <div style="padding:20px 16px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px">
+              <div style="margin-bottom:16px"><div style="font-size:10px; letter-spacing:.14em; color:#D5B95C; margin-bottom:5px">CERTIFICATE ID</div><div style="color:#D5B95C; font-weight:600; word-break:break-all; font-size:13px">{{ certId }}</div></div>
+              <div style="margin-bottom:16px"><div style="font-size:10px; letter-spacing:.14em; color:#D5B95C; margin-bottom:5px">FINGERPRINT (SHA-256)</div><div style="word-break:break-all; line-height:1.7">{{ certHash }}</div></div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
+                <div><div style="font-size:10px; letter-spacing:.14em; color:#D5B95C; margin-bottom:5px">SEALED (UTC)</div><div>{{ certTime }}</div></div>
+                <div><div style="font-size:10px; letter-spacing:.14em; color:#D5B95C; margin-bottom:5px">WALRUS BLOB</div><div style="word-break:break-all">{{ certWalrus }}</div></div>
+              </div>
+            </div>
+          </div>
+          <button onClick="{{ goRegister }}" style-hover="background:#F4EADB;color:#1E150F" style="margin-top:16px; background:transparent; color:#F4EADB; border:1px solid rgba(244,234,219,.13); padding:14px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.14em">VIEW IN REGISTER →</button>
+        </sc-if>
+        <sc-if value="{{ certEmpty }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1; border:1px solid rgba(244,234,219,.13); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 24px; position:relative; overflow:hidden">
+            <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.3em; color:rgba(244,234,219,.35); line-height:2">{{ sealEmblemText }}</div>
+            <div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(24px,3vw,34px); margin-top:18px; letter-spacing:-.01em">{{ sealStatusBig }}</div>
+            <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; margin-top:10px; color:#D5B95C">{{ sealStatusSub }}</div>
+          </div>
+        </sc-if>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- VERIFY -->
+    <sc-if value="{{ showVerify }}" hint-placeholder-val="{{ false }}">
+    <section style="padding:clamp(22px,4vw,52px)">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:18px; margin-bottom:30px">
+        <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(34px,5vw,64px); line-height:.95; letter-spacing:-.02em; margin:0">Verify a seal</h2>
+        <label style="display:flex; align-items:center; gap:10px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; cursor:pointer; border:1px solid rgba(244,234,219,.13); padding:10px 14px">
+          <input type="checkbox" onChange="{{ onTamper }}" style="width:16px; height:16px; accent-color:#C8503C; margin:0" />SIMULATE TAMPERED FILE
+        </label>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid rgba(244,234,219,.13)">
+        <div style="border-right:1px solid rgba(244,234,219,.13); padding:clamp(20px,3vw,36px)">
+          <div onClick="{{ pickVerify }}" onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" onDrop="{{ onVerifyDrop }}" id="verify-drop" style="border:1px solid rgba(244,234,219,.13); padding:clamp(20px,3vw,34px) 22px; text-align:center; cursor:pointer; background:#2A1D13">
+            <sc-if value="{{ verifyHasFile }}" hint-placeholder-val="{{ false }}">
+              <div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:19px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ verifyFileName }}</div>
+              <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:#D5B95C; margin-top:6px">{{ verifyFileMeta }}</div>
+            </sc-if>
+            <sc-if value="{{ verifyNoFile }}" hint-placeholder-val="{{ true }}">
+              <div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:22px">Drop file to check</div>
+              <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.1em; margin-top:8px; color:rgba(244,234,219,.5)">RE-HASHED LOCALLY</div>
+            </sc-if>
+          </div>
+          <input type="file" id="verify-input" onChange="{{ onVerifyInput }}" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none" />
+          <div style="margin-top:20px">
+            <label style="display:block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.16em; margin-bottom:8px; color:rgba(244,234,219,.5)">CERTIFICATE ID</label>
+            <input type="text" id="verify-cert-input" onInput="{{ onVerifyCert }}" placeholder="0x… (pick from register)" style="width:100%; border:1px solid rgba(244,234,219,.13); background:#2A1D13; padding:13px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; color:#F4EADB; outline:none" onFocus="{{ focusBrass }}" onBlur="{{ blurRule }}" />
+          </div>
+          <button onClick="{{ doVerify }}" disabled="{{ verifyBtnDisabled }}" style-hover="background:#6F3D24" style="width:100%; margin-top:18px; background:#8B4E2F; color:#F4EADB; border:0; padding:16px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; letter-spacing:.16em">{{ verifyBtnLabel }}</button>
+        </div>
+        <div style="padding:clamp(20px,3vw,36px); min-height:360px; display:flex; flex-direction:column">
+          <sc-if value="{{ verifyMatch }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid #5BA478; flex:1; display:flex; flex-direction:column">
+              <div style="background:#5BA478; color:#1E150F; padding:14px 16px; font-family:'Cormorant Garamond',Georgia,serif; font-size:22px; letter-spacing:.01em">✓ Seal verified</div>
+              <div style="padding:18px 16px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; flex:1">
+                <p style="margin:0 0 18px; line-height:1.6">FINGERPRINT MATCHES THE CERTIFICATE FROZEN ON SUI. UNALTERED SINCE SEALING.</p>
+                {{ verifyDiffEl }}
+                <div style="margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:14px">
+                  <div><div style="font-size:10px; color:#D5B95C; letter-spacing:.14em; margin-bottom:5px">REFERENCE</div><div>{{ verifyRef }}</div></div>
+                  <div><div style="font-size:10px; color:#D5B95C; letter-spacing:.14em; margin-bottom:5px">SEALED (UTC)</div><div>{{ verifyTime }}</div></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ verifyTamper }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid #C8503C; flex:1; display:flex; flex-direction:column">
+              <div style="background:#C8503C; color:#F4EADB; padding:14px 16px; font-family:'Cormorant Garamond',Georgia,serif; font-size:22px; letter-spacing:.01em">✕ Seal broken</div>
+              <div style="padding:18px 16px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; flex:1">
+                <p style="margin:0 0 18px; line-height:1.6">FINGERPRINT DIFFERS FROM THE CERTIFICATE. THE FILE HAS CHANGED, OR THIS IS A DIFFERENT DOCUMENT.</p>
+                {{ verifyDiffEl }}
+                <div style="margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:14px">
+                  <div><div style="font-size:10px; color:#D5B95C; letter-spacing:.14em; margin-bottom:5px">REFERENCE</div><div>{{ verifyRef }}</div></div>
+                  <div><div style="font-size:10px; color:#D5B95C; letter-spacing:.14em; margin-bottom:5px">SEALED (UTC)</div><div>{{ verifyTime }}</div></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ verifyEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1; border:1px dashed rgba(244,234,219,.2); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:36px">
+              <div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:26px">Nothing checked</div>
+              <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; margin-top:10px; color:rgba(244,234,219,.5); max-width:30ch">LOAD A FILE + CERTIFICATE ID TO COMPARE FINGERPRINTS.</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- REGISTER -->
+    <sc-if value="{{ showRegister }}" hint-placeholder-val="{{ false }}">
+    <section style="padding:clamp(22px,4vw,52px)">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:18px; margin-bottom:30px">
+        <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(34px,5vw,64px); line-height:.95; letter-spacing:-.02em; margin:0">The register</h2>
+        <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; margin:0; color:#D5B95C">{{ registerCount }} SEALED · SUI TESTNET</p>
+      </div>
+      <sc-if value="{{ registerHasRows }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid rgba(244,234,219,.13); overflow-x:auto">
+          <table style="width:100%; border-collapse:collapse; font-family:'IBM Plex Mono',ui-monospace,monospace; min-width:720px">
+            <thead>
+              <tr style="background:#2A1D13; color:rgba(244,234,219,.7)">
+                <th style="text-align:left; padding:13px 16px; font-size:10px; letter-spacing:.16em; font-weight:500; border-right:1px solid rgba(244,234,219,.13)">REFERENCE</th>
+                <th style="text-align:left; padding:13px 16px; font-size:10px; letter-spacing:.16em; font-weight:500; border-right:1px solid rgba(244,234,219,.13)">FINGERPRINT</th>
+                <th style="text-align:left; padding:13px 16px; font-size:10px; letter-spacing:.16em; font-weight:500; border-right:1px solid rgba(244,234,219,.13)">SEALED (UTC)</th>
+                <th style="text-align:left; padding:13px 16px; font-size:10px; letter-spacing:.16em; font-weight:500; border-right:1px solid rgba(244,234,219,.13)">SUI</th>
+                <th style="text-align:left; padding:13px 16px; font-size:10px; letter-spacing:.16em; font-weight:500"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ registerItems }}" as="row" hint-placeholder-count="3">
+                <tr style="border-top:1px solid rgba(244,234,219,.13)">
+                  <td style="padding:14px 16px; border-right:1px solid rgba(244,234,219,.13); vertical-align:top"><div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:17px">{{ row.ref }}</div><div style="font-size:10px; color:#D5B95C; margin-top:5px">CERT {{ row.certShort }}</div></td>
+                  <td style="padding:14px 16px; border-right:1px solid rgba(244,234,219,.13); vertical-align:top; font-size:11px">{{ row.fpShort }}</td>
+                  <td style="padding:14px 16px; border-right:1px solid rgba(244,234,219,.13); vertical-align:top; font-size:11px">{{ row.time }}</td>
+                  <td style="padding:14px 16px; border-right:1px solid rgba(244,234,219,.13); vertical-align:top"><span style="font-size:11px; color:#D5B95C; text-decoration:underline">{{ row.certShort }} ↗</span></td>
+                  <td style="padding:14px 16px; vertical-align:top"><button onClick="{{ row.reVerify }}" style-hover="background:#F4EADB;color:#1E150F" style="background:transparent; border:1px solid rgba(244,234,219,.13); color:#F4EADB; padding:7px 12px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.12em">RE-VERIFY</button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+      <sc-if value="{{ registerEmpty }}" hint-placeholder-val="{{ true }}">
+        <div style="border:1px dashed rgba(244,234,219,.2); padding:64px 24px; text-align:center">
+          <div style="font-family:'Cormorant Garamond',Georgia,serif; font-size:30px">No deeds sealed yet</div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; margin-top:12px; color:rgba(244,234,219,.5)">SEAL YOUR FIRST DOCUMENT TO OPEN THE REGISTER.</div>
+          <button onClick="{{ goSeal }}" style-hover="background:#6F3D24" style="margin-top:24px; background:#8B4E2F; color:#F4EADB; border:0; padding:14px 26px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.14em">SEAL A DOCUMENT →</button>
+        </div>
+      </sc-if>
+    </section>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- LEXIVAULT SURFACE -->
+  <sc-if value="{{ showLexi }}" hint-placeholder-val="{{ false }}">
+  <main style="min-height:calc(100vh - 60px)">
+    <sc-if value="{{ vaultLocked }}" hint-placeholder-val="{{ true }}">
+    <section style="position:relative; padding:clamp(28px,6vw,90px) clamp(20px,5vw,64px); min-height:calc(100vh - 60px); display:flex; flex-direction:column; justify-content:center">
+      <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.28em; margin:0 0 28px; color:#D5B95C">LEXIVAULT · ZERO-TRUST CONVEYANCING PORTAL</p>
+      <h1 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(48px,11vw,150px); line-height:.9; letter-spacing:-.025em; margin:0">A matter, <span style="font-style:italic; color:#8B4E2F">restricted.</span></h1>
+      <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(18px,2.4vw,26px); line-height:1.4; max-width:42ch; margin:28px 0 0; color:rgba(244,234,219,.5)">Privileged matter content is sealed behind on-chain authentication. Connect to prove control of the matter wallet — no password, no custody of your documents.</p>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:1px solid rgba(244,234,219,.13); margin-top:clamp(34px,5vw,52px); max-width:900px">
+        <button onClick="{{ authWallet }}" style-hover="background:#8B4E2F" style="background:transparent; color:#F4EADB; border:0; border-right:1px solid rgba(244,234,219,.13); padding:30px 24px; cursor:pointer; text-align:left; font-family:'Cormorant Garamond',Georgia,serif">
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.18em; color:#D5B95C; margin-bottom:14px">METHOD 01</div>
+          <div style="font-size:26px; letter-spacing:-.01em">Wallet connect</div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; margin-top:14px; color:rgba(244,234,219,.6)">SUI / SLUSH</div>
+        </button>
+        <button onClick="{{ authZk }}" style-hover="background:#8B4E2F" style="background:transparent; color:#F4EADB; border:0; border-right:1px solid rgba(244,234,219,.13); padding:30px 24px; cursor:pointer; text-align:left; font-family:'Cormorant Garamond',Georgia,serif">
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.18em; color:#D5B95C; margin-bottom:14px">METHOD 02</div>
+          <div style="font-size:26px; letter-spacing:-.01em">zkLogin</div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; margin-top:14px; color:rgba(244,234,219,.6)">ZERO-KNOWLEDGE OAUTH</div>
+        </button>
+        <button onClick="{{ authOauth }}" style-hover="background:#8B4E2F" style="background:transparent; color:#F4EADB; border:0; padding:30px 24px; cursor:pointer; text-align:left; font-family:'Cormorant Garamond',Georgia,serif">
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.18em; color:#D5B95C; margin-bottom:14px">METHOD 03</div>
+          <div style="font-size:26px; letter-spacing:-.01em">OAuth SSO</div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; margin-top:14px; color:rgba(244,234,219,.6)">GOOGLE / APPLE</div>
+        </button>
+      </div>
+      <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.06em; margin:26px 0 0; color:#D5B95C">{{ authStatusLine }}<span style="animation:blink 1s steps(1) infinite">▌</span></p>
+    </section>
+    </sc-if>
+
+    <sc-if value="{{ vaultUnlocked }}" hint-placeholder-val="{{ false }}">
+    <section style="padding:clamp(22px,4vw,52px)">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:18px; border-bottom:1px solid rgba(244,234,219,.13); padding-bottom:24px; margin-bottom:30px">
+        <div>
+          <p style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.2em; margin:0 0 12px; color:#D5B95C">LEXIVAULT · MATTER FILE · DECRYPTED</p>
+          <h2 style="font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:clamp(32px,5vw,60px); line-height:.95; letter-spacing:-.02em; margin:0">Smith / 2026 — Freehold purchase</h2>
+        </div>
+        <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; text-align:right; line-height:2">
+          <div><span style="color:#D5B95C">SESSION » </span>{{ sessionAddr }}</div>
+          <div><span style="color:#D5B95C">VIA » </span>{{ sessionVia }}</div>
+          <button onClick="{{ disconnect }}" style-hover="background:#C8503C; border-color:#C8503C" style="margin-top:8px; background:transparent; color:#F4EADB; border:1px solid rgba(244,234,219,.13); padding:7px 14px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.14em">END SESSION</button>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid rgba(244,234,219,.13)">
+        <div style="border-right:1px solid rgba(244,234,219,.13); padding:clamp(20px,3vw,36px); font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; line-height:2.1">
+          <div style="font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:14px">PRIVILEGED PARTICULARS · NEVER LEFT DEVICE</div>
+          <div style="display:grid; grid-template-columns:auto 1fr; gap:8px 20px">
+            <span style="color:#D5B95C">CLIENT</span><span>JONATHAN R. SMITH</span>
+            <span style="color:#D5B95C">PROPERTY</span><span>14 BRASSWELL LANE, EC2</span>
+            <span style="color:#D5B95C">FEE EARNER</span><span>A. OKONKWO</span>
+            <span style="color:#D5B95C">VALUE</span><span>£842,000</span>
+            <span style="color:#D5B95C">COMPLETION</span><span>2026-07-31</span>
+          </div>
+        </div>
+        <div style="padding:clamp(20px,3vw,36px)">
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.16em; color:#D5B95C; margin-bottom:16px">SEALED BUNDLE · ANCHORED ON SUI</div>
+          <div style="display:flex; flex-direction:column; gap:0; border:1px solid rgba(244,234,219,.13)">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 14px; border-bottom:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px"><span>TR1 TRANSFER DEED</span><span style="color:#5BA478; font-size:10px; letter-spacing:.1em">✓ SEALED</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 14px; border-bottom:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px"><span>OFFICIAL COPY · TITLE</span><span style="color:#5BA478; font-size:10px; letter-spacing:.1em">✓ SEALED</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 14px; border-bottom:1px solid rgba(244,234,219,.13); font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px"><span>COMPLETION STATEMENT</span><span style="color:#5BA478; font-size:10px; letter-spacing:.1em">✓ SEALED</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 14px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px"><span>MORTGAGE DEED</span><span style="color:#D5B95C; font-size:10px; letter-spacing:.1em">PENDING</span></div>
+          </div>
+          <button onClick="{{ goSeal }}" style-hover="background:#6F3D24" style="width:100%; margin-top:18px; background:#8B4E2F; color:#F4EADB; border:0; padding:15px; cursor:pointer; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.14em">SEAL NEXT DOCUMENT →</button>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastShown }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed; bottom:0; left:0; right:0; z-index:60; background:#2A1D13; color:#F4EADB; border-top:1px solid #8B4E2F; padding:14px 22px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.08em; text-align:center">{{ toastMsg }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    siteAuthed: false, siteEmail: '', sitePass: '', siteStatus: '', siteBusy: false,
+    surface: 'attesta', view: 'hero',
+    sealFile: null, sealHash: null, sealStatus: 'idle', sealProgress: 0, cert: null,
+    ref: '', client: '', epochs: '5',
+    verifyFile: null, verifyHash: null, verifyCertId: '', verifyResult: null, tamper: false,
+    register: [],
+    authed: false, session: null, authStatus: 'AWAITING METHOD',
+    toast: '',
+  };
+
+  componentDidMount(){
+    try { this.setState({ register: JSON.parse(localStorage.getItem('attesta.serif.register') || '[]') }); } catch(e){}
+    this._seal=null; this.startGate();
+  }
+  componentDidUpdate(_, prev){
+    if(this.state.siteAuthed && !prev.siteAuthed) setTimeout(()=>this.startHero(), 40);
+  }
+  componentWillUnmount(){ cancelAnimationFrame(this._raf); cancelAnimationFrame(this._graf); clearInterval(this._typeT); clearInterval(this._gtypeT); clearInterval(this._scanT); clearTimeout(this._toastT); }
+
+  // ---------- helpers ----------
+  rhex(n){ let s=''; const h='0123456789abcdef'; for(let i=0;i<n;i++) s+=h[Math.floor(Math.random()*16)]; return s; }
+  short(s,a=8,b=6){ return s && s.length>a+b+1 ? s.slice(0,a)+'…'+s.slice(-b) : s; }
+  fmtBytes(n){ if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; return (n/1048576).toFixed(1)+' MB'; }
+  async sha256(buf){ const d=await crypto.subtle.digest('SHA-256',buf); return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+  toast(m){ this.setState({toast:m}); clearTimeout(this._toastT); this._toastT=setTimeout(()=>this.setState({toast:''}),3400); }
+  focusBrass(e){ e.target.style.borderColor='#D5B95C'; }
+  blurRule(e){ e.target.style.borderColor='rgba(244,234,219,.13)'; }
+
+  // ---------- particle fields ----------
+  fieldDraw(canvasId, key){
+    const c=document.getElementById(canvasId); if(!c) return false;
+    const w=c.clientWidth, h=c.clientHeight, dpr=Math.min(2,window.devicePixelRatio||1);
+    if(!w||!h) return false;
+    if(c.width!==w*dpr||c.height!==h*dpr){ c.width=w*dpr; c.height=h*dpr; if(this[key]) this[key].w=0; }
+    const ctx=c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    const HEX='0123456789abcdef';
+    let st=this[key];
+    if(!st || st.w!==w || st.h!==h){
+      st={ w, h, nodes:[], pulses:[], glyphs:[] };
+      const N=Math.round(Math.min(150, Math.max(70, w*h/12000)));
+      for(let i=0;i<N;i++){
+        const anchor=Math.random()<0.07;
+        st.nodes.push({
+          x:Math.random()*w, y:Math.random()*h,
+          vx:(Math.random()-.5)*0.24, vy:(Math.random()-.5)*0.24,
+          r:anchor?2.4:(Math.random()<0.14?1.8:1.0),
+          anchor, ph:Math.random()*6.283, sp:0.5+Math.random()
+        });
+      }
+      for(let i=0;i<16;i++){
+        st.glyphs.push({ x:Math.random()*w, y:Math.random()*h, ch:HEX[Math.floor(Math.random()*16)],
+          vy:0.08+Math.random()*0.22, a:0.035+Math.random()*0.06, size:9+Math.random()*9, life:Math.random()*200 });
+      }
+      this[key]=st;
+    }
+    const t=performance.now()/1000, nodes=st.nodes;
+    for(const p of nodes){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<-4)p.x+=w+8; if(p.x>w+4)p.x-=w+8; if(p.y<-4)p.y+=h+8; if(p.y>h+4)p.y-=h+8;
+    }
+    // proximity mesh — connect nearby nodes, alpha by distance
+    const LINK=Math.min(180, Math.max(120, w/8)), L2=LINK*LINK;
+    ctx.lineWidth=1;
+    for(let i=0;i<nodes.length;i++){
+      const a=nodes[i];
+      for(let j=i+1;j<nodes.length;j++){
+        const b=nodes[j]; const dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy;
+        if(d2<L2){
+          const al=(1-Math.sqrt(d2)/LINK)*0.17;
+          const brass=a.anchor||b.anchor;
+          ctx.strokeStyle=(brass?'rgba(213,185,92,':'rgba(244,234,219,')+(al*(brass?1.3:1)).toFixed(3)+')';
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+    }
+    // nodes
+    for(const p of nodes){
+      if(p.anchor){
+        const tw=0.5+0.5*Math.sin(t*1.4+p.ph);
+        ctx.fillStyle='rgba(213,185,92,'+(0.3+0.45*tw).toFixed(3)+')';
+        ctx.fillRect(p.x-p.r, p.y-p.r, p.r*2, p.r*2);
+        if(Math.random()<0.0018 && st.pulses.length<10){
+          st.pulses.push({x:p.x,y:p.y,r:0,max:55+Math.random()*100,c:Math.random()<0.45?'139,78,47':'213,185,92'});
+        }
+      } else {
+        const tw=0.35+0.35*Math.sin(t*0.8*p.sp+p.ph);
+        ctx.fillStyle='rgba(244,234,219,'+tw.toFixed(3)+')';
+        ctx.fillRect(p.x-p.r/2, p.y-p.r/2, p.r, p.r);
+      }
+    }
+    // sealing pulse rings
+    for(let i=st.pulses.length-1;i>=0;i--){
+      const pu=st.pulses[i]; pu.r+=0.85;
+      const al=(1-pu.r/pu.max)*0.5;
+      if(al<=0){ st.pulses.splice(i,1); continue; }
+      ctx.strokeStyle='rgba('+pu.c+','+al.toFixed(3)+')';
+      ctx.beginPath(); ctx.arc(pu.x,pu.y,pu.r,0,6.283); ctx.stroke();
+    }
+    // drifting hex glyphs
+    ctx.textBaseline='alphabetic';
+    for(const g of st.glyphs){
+      g.y-=g.vy; g.life-=1;
+      if(g.life<=0){ g.ch=HEX[Math.floor(Math.random()*16)]; g.life=120+Math.random()*240; }
+      if(g.y<-14){ g.y=h+14; g.x=Math.random()*w; }
+      ctx.font=g.size.toFixed(0)+'px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillStyle='rgba(244,234,219,'+g.a.toFixed(3)+')';
+      ctx.fillText(g.ch, g.x, g.y);
+    }
+    return true;
+  }
+  // Guilloché seal — a morphing engraved rosette that reads as a unique fingerprint
+  sealSigil(id){
+    const c=document.getElementById(id); if(!c) return false;
+    const w=c.clientWidth, h=c.clientHeight, dpr=Math.min(2,window.devicePixelRatio||1);
+    if(!w||!h) return false;
+    if(c.width!==w*dpr||c.height!==h*dpr){ c.width=w*dpr; c.height=h*dpr; }
+    const ctx=c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    if(!this._seal){
+      const rings=[]; const M=9;
+      for(let i=0;i<M;i++){
+        rings.push({
+          rad:0.22+0.74*(i/(M-1)),
+          f1:3+Math.floor(Math.random()*7),
+          a1:0.05+Math.random()*0.13,
+          f2:11+Math.floor(Math.random()*22),
+          a2:0.012+Math.random()*0.05,
+          lfo:0.25+Math.random()*0.6,
+          lfA:0.4+Math.random()*0.9,
+          rot:(Math.random()-.5)*0.07,
+          psp:(Math.random()-.5)*0.6+0.15,
+          alpha:0.08+Math.random()*0.15,
+          gold:Math.random()<0.5,
+          dir:Math.random()<0.5?1:-1
+        });
+      }
+      this._seal={ rings, t0:performance.now() };
+    }
+    const t=(performance.now()-this._seal.t0)/1000;
+    const cx=w*0.5, cy=h*0.5, base=Math.min(w,h)*0.52;
+    ctx.lineWidth=1;
+    for(const r of this._seal.rings){
+      const breathe=1+0.028*Math.sin(t*0.5+r.f1);
+      const RR=base*r.rad*breathe;
+      const ph=t*r.psp;
+      const rot=t*r.rot;
+      const a1=r.a1*(1+0.4*Math.sin(t*r.lfo)*r.lfA);   // morphing amplitude → never identical
+      const a2=r.a2*(1+0.5*Math.cos(t*r.lfo*0.7));
+      ctx.strokeStyle=(r.gold?'rgba(213,185,92,':'rgba(244,234,219,')+r.alpha.toFixed(3)+')';
+      ctx.beginPath();
+      const N=600;
+      for(let i=0;i<=N;i++){
+        const u=i/N*Math.PI*2;
+        const rr=RR*(1 + a1*Math.cos(r.f1*u + ph*r.dir) + a2*Math.cos(r.f2*u - ph*1.4));
+        const a=u+rot;
+        const x=cx+rr*Math.cos(a), y=cy+rr*Math.sin(a);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    // luminous core
+    const cr=base*0.05*(1+0.18*Math.sin(t*1.3));
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,base*0.5);
+    g.addColorStop(0,'rgba(213,185,92,0.16)'); g.addColorStop(1,'rgba(213,185,92,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,base*0.5,0,6.283); ctx.fill();
+    ctx.fillStyle='rgba(213,185,92,0.55)'; ctx.beginPath(); ctx.arc(cx,cy,cr,0,6.283); ctx.fill();
+    return true;
+  }
+
+  // Double helix — nodes condense onto two spiralling strands (with base-pair rungs),
+  // twist through depth, then dissipate into a drifting cloud and reform. A looping lifecycle.
+  initJelly(id){
+    if(typeof THREE==='undefined') return;
+    if(!this._fields) this._fields={};
+    if(this._fields[id]) return;
+    const canvas=document.getElementById(id); if(!canvas) return;
+    let w=canvas.clientWidth, h=canvas.clientHeight; if(!w||!h) return;
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    renderer.setPixelRatio(dpr); renderer.setSize(w,h,false); renderer.setClearColor(0x000000,0);
+    const scene=new THREE.Scene();
+    const cam=new THREE.OrthographicCamera(-w/2,w/2,h/2,-h/2,-1000,1000); cam.position.z=10;
+    const N=2200;
+    const pos=new Float32Array(N*2*3), col=new Float32Array(N*2*3);
+    const npos=new Float32Array(N*3), ncol=new Float32Array(N*3);
+    const BRASS=[0.84,0.73,0.36], CREAM=[0.93,0.90,0.84], GREEN=[0.36,0.64,0.47];
+    const P=[];
+    for(let i=0;i<N;i++){
+      const x=(Math.random()-0.5)*w, y=(Math.random()-0.5)*h;
+      const isRung=Math.random()<0.22;            // ~22% are base-pair rung nodes
+      const strand=Math.random()<0.5?0:1;
+      const u=Math.random();                       // position along the helix [0,1]
+      const s=Math.random();                       // across-rung parameter [0,1]
+      const base=isRung?GREEN:(strand===0?BRASS:CREAM);
+      P.push({ x,y,hx:x,hy:y,vx:0,vy:0, sp:0.6+Math.random()*0.9, ph:Math.random()*6.283, isRung, strand, u, s, base });
+      const m=0.5+Math.random()*0.4;
+      for(let k=0;k<2;k++){ const o=(i*2+k)*3; pos[o]=x; pos[o+1]=y; pos[o+2]=0; col[o]=base[0]*m; col[o+1]=base[1]*m; col[o+2]=base[2]*m; }
+      npos[i*3]=x; npos[i*3+1]=y; ncol[i*3]=base[0]*m; ncol[i*3+1]=base[1]*m; ncol[i*3+2]=base[2]*m;
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+    scene.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.85, depthTest:false })));
+    const ngeo=new THREE.BufferGeometry();
+    ngeo.setAttribute('position',new THREE.BufferAttribute(npos,3));
+    ngeo.setAttribute('color',new THREE.BufferAttribute(ncol,3));
+    scene.add(new THREE.Points(ngeo,new THREE.PointsMaterial({ size:2, vertexColors:true, transparent:true, opacity:0.95, sizeAttenuation:false, depthTest:false })));
+    this._fields[id]={ id, renderer, scene, cam, geo, ngeo, P, pos, col, npos, ncol, w, h, t0:performance.now() };
+  }
+  stepJelly(F){
+    const canvas=document.getElementById(F.id); if(!canvas) return;
+    let w=canvas.clientWidth, h=canvas.clientHeight;
+    if(w&&h&&(w!==F.w||h!==F.h)){
+      F.w=w; F.h=h; F.renderer.setSize(w,h,false);
+      F.cam.left=-w/2; F.cam.right=w/2; F.cam.top=h/2; F.cam.bottom=-h/2; F.cam.updateProjectionMatrix();
+    }
+    const t=(performance.now()-F.t0)/1000, P=F.P, pos=F.pos, col=F.col, npos=F.npos, ncol=F.ncol, W=F.w, H=F.h, TAIL=4, TWO=6.28318;
+    // helix geometry — vertical twin strands sitting left, behind the headline
+    const cx=-W*0.05, spanH=H*0.98, R=Math.min(W,H)*0.165, turns=3.1, spin=t*0.5;
+    // lifecycle: form -> hold (spiralling) -> dissipate -> reform
+    const CYC=17, cph=(t%CYC)/CYC, ss=x=>{ x=Math.max(0,Math.min(1,x)); return x*x*(3-2*x); };
+    let form;
+    if(cph<0.20) form=ss(cph/0.20);
+    else if(cph<0.72) form=1;
+    else form=1-ss((cph-0.72)/0.28);
+    const hdrift=Math.min(W,H)*0.0004;
+    for(let i=0;i<P.length;i++){
+      const p=P[i];
+      const y=(p.u-0.5)*spanH;
+      const theta=p.u*turns*TWO + spin;
+      // two backbones offset by PI; rungs interpolate across the base pair
+      let tx, depth;
+      if(p.isRung){
+        const x0=cx+Math.cos(theta)*R, x1=cx+Math.cos(theta+Math.PI)*R;
+        const d0=Math.sin(theta), d1=Math.sin(theta+Math.PI);
+        tx=x0+(x1-x0)*p.s; depth=d0+(d1-d0)*p.s;
+      } else {
+        const th=theta+p.strand*Math.PI;
+        tx=cx+Math.cos(th)*R; depth=Math.sin(th);
+      }
+      const ty=y;
+      // dispersed home drifts on a slow flow field so the cloud stays alive & full
+      const fa=Math.sin(p.hy*0.0026+t*0.06)+0.5*Math.cos((p.hx+p.hy)*0.0011+t*0.03);
+      const fb=Math.cos(p.hx*0.0024-t*0.05)+0.5*Math.sin((p.hx-p.hy)*0.0010-t*0.025);
+      const ang=fa+fb+p.ph;
+      p.hx+=Math.cos(ang)*hdrift; p.hy+=Math.sin(ang)*hdrift*0.7;
+      if(p.hx<-W/2)p.hx=W/2; if(p.hx>W/2)p.hx=-W/2;
+      if(p.hy<-H/2)p.hy=H/2; if(p.hy>H/2)p.hy=-H/2;
+      // desired = blend between dispersed home and helix target
+      const dx=p.hx+(tx-p.hx)*form, dy=p.hy+(ty-p.hy)*form;
+      const sp=0.85+p.sp*0.12;
+      p.vx=p.vx*0.90+(dx-p.x)*0.026*sp;
+      p.vy=p.vy*0.90+(dy-p.y)*0.026*sp;
+      const vmax=Math.min(W,H)*0.006, v2=p.vx*p.vx+p.vy*p.vy;
+      if(v2>vmax*vmax){ const s=vmax/Math.sqrt(v2); p.vx*=s; p.vy*=s; }
+      p.x+=p.vx; p.y+=p.vy;
+      // depth shading: front of the twist brighter, back dim — sells the 3D rotation
+      const near=0.5+0.5*depth, bright=(0.32+0.68*near)*(0.45+0.55*form), b=p.base;
+      const o=(i*2)*3;
+      col[o]=col[o+3]=b[0]*bright; col[o+1]=col[o+4]=b[1]*bright; col[o+2]=col[o+5]=b[2]*bright;
+      ncol[i*3]=b[0]*bright; ncol[i*3+1]=b[1]*bright; ncol[i*3+2]=b[2]*bright;
+      pos[o]=p.x-p.vx*TAIL; pos[o+1]=p.y-p.vy*TAIL; pos[o+2]=0;
+      pos[o+3]=p.x; pos[o+4]=p.y; pos[o+5]=0;
+      npos[i*3]=p.x; npos[i*3+1]=p.y;
+    }
+    F.geo.attributes.position.needsUpdate=true; F.geo.attributes.color.needsUpdate=true;
+    F.ngeo.attributes.position.needsUpdate=true; F.ngeo.attributes.color.needsUpdate=true;
+    F.renderer.render(F.scene,F.cam);
+  }
+  runField(id, rafKey){
+    cancelAnimationFrame(this[rafKey]);
+    let tries=0;
+    const loop=()=>{
+      try{
+        if(this['_fieldFail_'+id]) return;
+        const F=this._fields && this._fields[id];
+        if(!F){ if(tries++>240){ this['_fieldFail_'+id]=true; return; } this.initJelly(id); }
+        else this.stepJelly(F);
+      }catch(err){ this['_fieldFail_'+id]=true; console.warn('[jelly] disabled:', err && err.message); return; }
+      this[rafKey]=requestAnimationFrame(loop);
+    };
+    this[rafKey]=requestAnimationFrame(loop);
+  }
+  liveHash(elId, key){
+    clearInterval(this[key]);
+    const H='0123456789abcdef';
+    let hash=this.rhex(64).split('');
+    this[key]=setInterval(()=>{
+      const e=document.getElementById(elId); if(!e) return;
+      const n=2+Math.floor(Math.random()*3);
+      for(let k=0;k<n;k++){ hash[Math.floor(Math.random()*64)]=H[Math.floor(Math.random()*16)]; }
+      e.textContent=hash.join('');
+    },60);
+  }
+  startGate(){
+    this.liveHash('gate-hash','_gtypeT');
+    this.runField('gatefield','_graf');
+  }
+  startHero(){
+    this.liveHash('hero-hash2','_typeT');
+    this.runField('hashfield2','_raf');
+  }
+
+  // ---------- site gate auth ----------
+  onSiteEmail(e){ this.setState({siteEmail:e.target.value}); }
+  onSitePass(e){ this.setState({sitePass:e.target.value}); }
+  async runSiteAuth(via){
+    if(this.state.siteBusy) return;
+    const wait=ms=>new Promise(r=>setTimeout(r,ms));
+    this.setState({siteBusy:true, siteStatus:'» REDIRECTING TO '+via+'…'}); await wait(650);
+    this.setState({siteStatus:'» VERIFYING IDENTITY…'}); await wait(750);
+    this.setState({siteAuthed:true, siteBusy:false, siteStatus:'', session:{addr:'0x'+this.rhex(40), via}});
+    this.toast('SIGNED IN · '+via);
+  }
+  siteGoogle(){ this.runSiteAuth('GOOGLE'); }
+  siteApple(){ this.runSiteAuth('APPLE'); }
+  siteMicrosoft(){ this.runSiteAuth('MICROSOFT'); }
+  siteLogin(){ if(!String(this.state.siteEmail||'').trim()) return; this.runSiteAuth('FIRM EMAIL'); }
+  siteLogout(){ this.setState({siteAuthed:false, authed:false, session:null, surface:'attesta', view:'hero', siteEmail:'', sitePass:''}); setTimeout(()=>this.startGate(),40); }
+
+  // ---------- surface nav ----------
+  goHome(){ this.setState({surface:'attesta', view:'hero'}); setTimeout(()=>this.startHero(),30); }
+  goAttesta(){ this.setState({surface:'attesta'}); if(this.state.view==='hero') setTimeout(()=>this.startHero(),30); }
+  goLexi(){ this.setState({surface:'lexivault'}); }
+  goHero(){ this.setState({surface:'attesta', view:'hero'}); setTimeout(()=>this.startHero(),30); }
+  goSeal(){ this.setState({surface:'attesta', view:'seal'}); }
+  goVerify(){ this.setState({surface:'attesta', view:'verify'}); }
+  goRegister(){ this.setState({surface:'attesta', view:'register'}); }
+
+  // ---------- drag ----------
+  onDragOver(e){ e.preventDefault(); e.currentTarget.style.borderColor='#D5B95C'; }
+  onDragLeave(e){ e.currentTarget.style.borderColor='rgba(244,234,219,.13)'; }
+
+  // ---------- seal ----------
+  pickSeal(){ document.getElementById('seal-input').click(); }
+  onSealInput(e){ const f=e.target.files[0]; if(f) this.loadSeal(f); }
+  onSealDrop(e){ e.preventDefault(); e.currentTarget.style.borderColor='rgba(244,234,219,.13)'; const f=e.dataTransfer.files[0]; if(f) this.loadSeal(f); }
+  async loadSeal(f){
+    const buf=await f.arrayBuffer(); const hash=await this.sha256(buf);
+    this.setState({ sealFile:{name:f.name,size:f.size}, sealHash:hash, sealStatus:'ready', cert:null, sealProgress:0 });
+  }
+  onRef(e){ this.setState({ref:e.target.value}); }
+  onClient(e){ this.setState({client:e.target.value}); }
+  onEpochs(e){ this.setState({epochs:e.target.value}); }
+  async doSeal(){
+    if(!this.state.sealHash || this.state.sealStatus==='walrus' || this.state.sealStatus==='sui') return;
+    const wait=ms=>new Promise(r=>setTimeout(r,ms));
+    this.setState({sealStatus:'walrus', sealProgress:38, cert:null});
+    await wait(750);
+    this.setState({sealStatus:'sui', sealProgress:74});
+    await wait(900);
+    const cert={
+      certId:'0x'+this.rhex(64), walrusBlob:this.rhex(20)+'_'+this.rhex(8),
+      sha256:this.state.sealHash, ref:this.state.ref.trim()||'Untitled record',
+      client:this.state.client.trim()||null, sealedAt:new Date().toISOString(),
+    };
+    const register=[cert, ...this.state.register];
+    try{ localStorage.setItem('attesta.serif.register', JSON.stringify(register)); }catch(e){}
+    this.setState({sealStatus:'sealed', sealProgress:100, cert, register});
+    this.toast('CERTIFICATE FROZEN ON SUI · IMMUTABLE');
+  }
+
+  // ---------- verify ----------
+  pickVerify(){ document.getElementById('verify-input').click(); }
+  onVerifyInput(e){ const f=e.target.files[0]; if(f) this.loadVerify(f); }
+  onVerifyDrop(e){ e.preventDefault(); e.currentTarget.style.borderColor='rgba(244,234,219,.13)'; const f=e.dataTransfer.files[0]; if(f) this.loadVerify(f); }
+  async loadVerify(f){ const buf=await f.arrayBuffer(); const hash=await this.sha256(buf); this.setState({ verifyFile:{name:f.name,size:f.size}, verifyHash:hash }); }
+  onVerifyCert(e){ this.setState({verifyCertId:e.target.value}); }
+  onTamper(e){ this.setState({tamper:e.target.checked}); if(this.state.verifyResult) setTimeout(()=>this.runVerify(),0); }
+  doVerify(){ this.runVerify(); }
+  runVerify(){
+    const id=this.state.verifyCertId.trim();
+    const cert=this.state.register.find(c=>c.certId===id) || (this.state.register.length?this.state.register[0]:null);
+    if(!cert){ this.toast('NO CERTIFICATE AT THAT ID'); return; }
+    let fileHash=this.state.verifyHash;
+    if(this.state.tamper){ const h='0123456789abcdef'; let nh=h[(h.indexOf(fileHash[0])+7)%16]; fileHash=nh+fileHash.slice(1); }
+    const match=fileHash===cert.sha256;
+    this.setState({ verifyResult:{ match, sealedHash:cert.sha256, fileHash, ref:cert.ref, sealedAt:cert.sealedAt } });
+    this.startScan();
+  }
+  startScan(){
+    clearInterval(this._scanT);
+    this.setState({scanPos:0});
+    const len=(this.state.verifyResult&&this.state.verifyResult.sealedHash)?this.state.verifyResult.sealedHash.length:64;
+    this._scanT=setInterval(()=>{
+      this.setState(s=>{ const n=s.scanPos+1; if(n>=len){ clearInterval(this._scanT); return {scanPos:len}; } return {scanPos:n}; });
+    },42);
+  }
+  diffEl(){
+    const r=this.state.verifyResult; if(!r) return null;
+    const pos=this.state.scanPos||0;
+    const done=pos>=r.sealedHash.length;
+    const row=(label,str,cmp)=>React.createElement('div',{style:{marginBottom:'10px'}},
+      React.createElement('div',{style:{fontSize:'9px',letterSpacing:'.14em',color:'#D5B95C',marginBottom:'5px'}},label),
+      React.createElement('div',{style:{wordBreak:'break-all',lineHeight:'1.9',fontSize:'12px'}},
+        str.split('').map((ch,i)=>{
+          const checked=i<pos, ok=cmp[i]===ch;
+          const head=(i>=pos-4&&i<pos);
+          let bg='transparent', col='rgba(244,234,219,.26)', sh='none';
+          if(head){
+            const d=pos-i, a=(1-(d-1)/4);
+            bg='rgba(213,185,92,'+(0.32+0.62*a).toFixed(2)+')'; col='#1E150F';
+            if(d===1) sh='0 0 12px rgba(213,185,92,.9)';
+          } else if(checked){
+            if(ok){ bg='rgba(91,164,120,.16)'; col='#5BA478'; }
+            else { bg='#C8503C'; col='#1E150F'; sh='0 0 10px rgba(200,80,60,.75)'; }
+          }
+          return React.createElement('span',{key:i,style:{background:bg,color:col,boxShadow:sh,transition:'background .15s, color .15s',padding:'1px .5px'}},ch);
+        })
+      )
+    );
+    const pct=Math.round(pos/r.sealedHash.length*100);
+    const head=React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:'9px',letterSpacing:'.16em',color:'#D5B95C',marginBottom:'10px'}},
+      React.createElement('span',null, done?(r.match?'◆ 64/64 NIBBLES MATCH':'◆ MISMATCH DETECTED'):('SCANNING FINGERPRINT…')),
+      React.createElement('span',null, pct+'%')
+    );
+    const bar=React.createElement('div',{style:{height:'3px',background:'rgba(244,234,219,.1)',marginBottom:'14px',position:'relative',overflow:'hidden'}},
+      React.createElement('div',{style:{height:'100%',width:pct+'%',background:done?(r.match?'#5BA478':'#C8503C'):'#D5B95C',transition:'width .1s linear'}})
+    );
+    return React.createElement('div',{style:{fontFamily:"'IBM Plex Mono',ui-monospace,monospace"}},
+      head, bar,
+      row('SEALED ON SUI', r.sealedHash, r.fileHash),
+      row('THIS FILE', r.fileHash, r.sealedHash)
+    );
+  }
+
+  // ---------- lexivault auth ----------
+  async runAuth(via){
+    const wait=ms=>new Promise(r=>setTimeout(r,ms));
+    this.setState({authStatus:'» REQUESTING '+via+'…'}); await wait(600);
+    this.setState({authStatus:'» VERIFYING SIGNATURE…'}); await wait(700);
+    const addr='0x'+this.rhex(40);
+    this.setState({ authed:true, session:{addr, via}, authStatus:'AWAITING METHOD' });
+    this.toast('SESSION OPEN · '+via+' · '+this.short(addr,6,4));
+  }
+  authWallet(){ this.runAuth('WALLET CONNECT'); }
+  authZk(){ this.runAuth('zkLOGIN'); }
+  authOauth(){ this.runAuth('OAUTH'); }
+  disconnect(){ this.setState({authed:false, session:this.state.session}); this.toast('SESSION ENDED'); }
+
+  renderVals(){
+    const s=this.state;
+    const isA=s.surface==='attesta', isL=s.surface==='lexivault';
+    const sealLabels={ idle:'PLACE A DOCUMENT', ready:'SEAL ON SUI & WALRUS', walrus:'STORING ON WALRUS…', sui:'FREEZING ON SUI…', sealed:'SEAL AGAIN' };
+    const sealBig={ idle:'Awaiting document', ready:'Ready to seal', walrus:'Walrus', sui:'Sui', sealed:'Sealed' };
+    const sealSub={ idle:'DROP A FILE TO BEGIN', ready:s.sealHash?'SHA-256 · '+this.short(s.sealHash,12,8):'', walrus:'STORING MANIFEST BLOB', sui:'FREEZING CERTIFICATE', sealed:'IMMUTABLE BY CONSTRUCTION' };
+    const r=s.verifyResult;
+
+    const registerItems=s.register.map(c=>({
+      ref:c.ref, certShort:this.short(c.certId,8,5), fpShort:this.short(c.sha256,12,10),
+      time:(c.sealedAt||'').slice(0,16).replace('T',' '),
+      reVerify:()=>{ this.setState({surface:'attesta', view:'verify', verifyCertId:c.certId}); const el=document.getElementById('verify-cert-input'); if(el) el.value=c.certId; this.toast('CERTIFICATE LOADED · ADD THE FILE'); },
+    }));
+
+    return {
+      // site gate
+      siteLocked:!s.siteAuthed, siteUnlocked:s.siteAuthed,
+      siteGoogle:()=>this.siteGoogle(), siteApple:()=>this.siteApple(), siteMicrosoft:()=>this.siteMicrosoft(),
+      siteLogin:()=>this.siteLogin(),
+      onSiteEmail:e=>this.onSiteEmail(e), onSitePass:e=>this.onSitePass(e),
+      siteBtnLabel: s.siteBusy?'SIGNING IN…':'SIGN IN',
+      siteBtnDisabled: !!s.siteBusy || !String(s.siteEmail||'').trim(),
+      siteStatusLine: s.siteStatus,
+      siteSessionLabel: s.session?('●  '+this.short(s.session.addr,6,4)):'NO SESSION',
+      siteLogout:()=>this.siteLogout(),
+      focusBrass:e=>this.focusBrass(e), blurRule:e=>this.blurRule(e),
+
+      // nav
+      goHome:()=>this.goHome(), goAttesta:()=>this.goAttesta(), goLexi:()=>this.goLexi(),
+      surfaceAttestaActive:isA, surfaceLexiActive:isL,
+      goHero:()=>this.goHero(), goSeal:()=>this.goSeal(), goVerify:()=>this.goVerify(), goRegister:()=>this.goRegister(),
+      viewLabel: (s.view||'').toUpperCase(),
+      navHomeColor: s.view==='hero' ? '#D5B95C' : '#F4EADB',
+      navSealColor: s.view==='seal' ? '#D5B95C' : '#F4EADB',
+      navVerifyColor: s.view==='verify' ? '#D5B95C' : '#F4EADB',
+      navRegisterColor: s.view==='register' ? '#D5B95C' : '#F4EADB',
+      showAttesta:isA, showLexi:isL,
+      showHero:s.view==='hero', showSeal:s.view==='seal', showVerify:s.view==='verify', showRegister:s.view==='register',
+
+      // seal
+      pickSeal:()=>this.pickSeal(), onSealInput:e=>this.onSealInput(e), onSealDrop:e=>this.onSealDrop(e),
+      onDragOver:e=>this.onDragOver(e), onDragLeave:e=>this.onDragLeave(e),
+      sealHasFile:!!s.sealFile, sealNoFile:!s.sealFile,
+      sealFileName:s.sealFile?s.sealFile.name:'', sealFileMeta:s.sealFile?(this.fmtBytes(s.sealFile.size)+' · SHA-256 '+this.short(s.sealHash,10,8)):'',
+      onRef:e=>this.onRef(e), onClient:e=>this.onClient(e), onEpochs:e=>this.onEpochs(e),
+      sealProgressPct: s.sealProgress+'%',
+      sealBtnLabel: sealLabels[s.sealStatus]||'SEAL', sealBtnDisabled: !s.sealHash || s.sealStatus==='walrus' || s.sealStatus==='sui',
+      doSeal:()=>this.doSeal(),
+      certShown:!!s.cert, certEmpty:!s.cert,
+      certId:s.cert?s.cert.certId:'', certHash:s.cert?s.cert.sha256:'', certTime:s.cert?s.cert.sealedAt:'', certWalrus:s.cert?s.cert.walrusBlob:'',
+      sealStatusBig:sealBig[s.sealStatus]||'', sealStatusSub:sealSub[s.sealStatus]||'',
+      sealEmblemText:'ATTESTA · REGISTER OF RECORD · SUI · WALRUS',
+
+      // verify
+      pickVerify:()=>this.pickVerify(), onVerifyInput:e=>this.onVerifyInput(e), onVerifyDrop:e=>this.onVerifyDrop(e),
+      onVerifyCert:e=>this.onVerifyCert(e), onTamper:e=>this.onTamper(e),
+      verifyHasFile:!!s.verifyFile, verifyNoFile:!s.verifyFile,
+      verifyFileName:s.verifyFile?s.verifyFile.name:'', verifyFileMeta:s.verifyFile?(this.fmtBytes(s.verifyFile.size)+' · SHA-256 '+this.short(s.verifyHash,10,8)):'',
+      verifyBtnDisabled: !(s.verifyHash && s.verifyCertId.trim()), verifyBtnLabel:'VERIFY SEAL', doVerify:()=>this.doVerify(),
+      verifyMatch: !!(r && r.match), verifyTamper: !!(r && !r.match), verifyEmpty: !r,
+      verifyDiffEl: this.diffEl(),
+      verifyRef: r?r.ref:'', verifyTime: r?(r.sealedAt||'').slice(0,19).replace('T',' '):'',
+
+      // register
+      registerItems, registerHasRows:s.register.length>0, registerEmpty:s.register.length===0,
+      registerCount:String(s.register.length).padStart(2,'0'),
+
+      // lexivault
+      vaultLocked:!s.authed, vaultUnlocked:s.authed,
+      authWallet:()=>this.authWallet(), authZk:()=>this.authZk(), authOauth:()=>this.authOauth(),
+      authStatusLine: s.authStatus,
+      sessionAddr: s.session?this.short(s.session.addr,8,6):'—', sessionVia: s.session?s.session.via:'—',
+      disconnect:()=>this.disconnect(),
+
+      // toast
+      toastShown:!!s.toast, toastMsg:s.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
