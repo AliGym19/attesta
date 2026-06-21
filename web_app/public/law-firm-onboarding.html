@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:#1E150F;color:#F4EADB;font-family:'Cormorant Garamond',Georgia,serif;-webkit-font-smoothing:antialiased}
+  input,textarea{outline:none;background:#2A1D13;border:1px solid rgba(244,234,219,.16);color:#F4EADB;font-family:'IBM Plex Mono',ui-monospace,monospace;transition:border-color .2s}
+  input:focus{border-color:rgba(213,185,92,.45)}
+  input::placeholder{color:rgba(244,234,219,.22)}
+  input:-webkit-autofill{-webkit-text-fill-color:#F4EADB;-webkit-box-shadow:0 0 0 1000px #2A1D13 inset}
+  ::selection{background:#8B4E2F;color:#F4EADB}
+  button{cursor:pointer;transition:opacity .15s,background .15s,color .15s}
+  button:disabled{opacity:.38;cursor:not-allowed}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @keyframes pulsedot{0%,100%{opacity:1}50%{opacity:.2}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes spinrev{to{transform:rotate(-360deg)}}
+  @keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes lockpulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#1E150F;color:#F4EADB;font-family:'Cormorant Garamond',Georgia,serif">
+
+  <!-- ══ HEADER ══ -->
+  <header style="position:sticky;top:0;z-index:40;background:#1E150F;border-bottom:1px solid rgba(244,234,219,.11)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,3vw,48px);height:62px">
+      <span style="font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600;letter-spacing:.02em;flex:none">Attesta</span>
+
+      <div style="display:flex;align-items:center">
+        <sc-for list="{{ progressSteps }}" as="ps" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 clamp(8px,1.4vw,16px)">
+            <div style="width:22px;height:22px;border-radius:50%;background:{{ ps.bg }};border:{{ ps.border }};display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0;color:{{ ps.textColor }}">{{ ps.n }}</div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.12em;color:{{ ps.labelColor }};white-space:nowrap">{{ ps.label }}</span>
+          </div>
+          <sc-if value="{{ ps.showLine }}" hint-placeholder-val="{{ true }}">
+          <div style="width:clamp(14px,1.8vw,28px);height:1px;background:rgba(244,234,219,.09);flex:none"></div>
+          </sc-if>
+        </div>
+        </sc-for>
+      </div>
+
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;color:rgba(244,234,219,.28);flex:none">REGISTER OF RECORD</span>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- TWO-COLUMN LAYOUT — steps 1-4             -->
+  <!-- ══════════════════════════════════════════ -->
+  <sc-if value="{{ showTwoCol }}" hint-placeholder-val="{{ true }}">
+  <div style="display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 62px)">
+
+    <!-- ════ LEFT PANEL ════ -->
+    <div style="border-right:1px solid rgba(244,234,219,.11);padding:clamp(24px,3.5vw,48px) clamp(20px,3.5vw,52px);display:flex;flex-direction:column;background:#1E150F;position:sticky;top:62px;height:calc(100vh - 62px);overflow:hidden">
+
+      <!-- Current step context -->
+      <div style="padding-bottom:clamp(16px,2.5vh,28px);border-bottom:1px solid rgba(244,234,219,.07);margin-bottom:clamp(16px,2.5vh,28px)">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;color:#D5B95C;margin-bottom:11px">{{ leftTag }}</div>
+        <h2 style="font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:clamp(22px,2.6vw,36px);line-height:1.02;letter-spacing:-.02em;margin:0 0 10px;max-width:22ch">{{ leftHeading }}</h2>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(13px,1.3vw,16px);line-height:1.6;color:rgba(244,234,219,.42);max-width:40ch;margin:0">{{ leftSub }}</p>
+      </div>
+
+      <!-- ── Onboarding step diagram ── -->
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+
+        <!-- Step 1 -->
+        <div style="display:flex;gap:clamp(10px,1.2vw,16px);align-items:flex-start">
+          <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:28px">
+            <div style="width:26px;height:26px;border-radius:50%;background:{{ d1.circBg }};border:{{ d1.circBorder }};display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0;color:{{ d1.circColor }};flex:none;font-weight:600">{{ d1.label }}</div>
+            <div style="width:1px;flex:1;min-height:clamp(22px,4vh,40px);background:{{ d1.lineColor }};margin:3px 0"></div>
+          </div>
+          <div style="padding-top:3px;padding-bottom:clamp(10px,2vh,20px)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.13em;color:{{ d1.nameColor }};margin-bottom:5px">IDENTITY VERIFICATION</div>
+            <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(13px,1.2vw,15px);color:{{ d1.pointColor }};line-height:1.65;font-style:italic">SRA Solicitors Register cross-check<br />Email domain lock · Compliance gate</div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="display:flex;gap:clamp(10px,1.2vw,16px);align-items:flex-start">
+          <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:28px">
+            <div style="width:26px;height:26px;border-radius:50%;background:{{ d2.circBg }};border:{{ d2.circBorder }};display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0;color:{{ d2.circColor }};flex:none;font-weight:600">{{ d2.label }}</div>
+            <div style="width:1px;flex:1;min-height:clamp(22px,4vh,40px);background:{{ d2.lineColor }};margin:3px 0"></div>
+          </div>
+          <div style="padding-top:3px;padding-bottom:clamp(10px,2vh,20px)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.13em;color:{{ d2.nameColor }};margin-bottom:5px">ACCOUNT PROTECTION</div>
+            <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(13px,1.2vw,15px);color:{{ d2.pointColor }};line-height:1.65;font-style:italic">Sort code · Account number<br />£0.01 micro-deposit ownership proof</div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="display:flex;gap:clamp(10px,1.2vw,16px);align-items:flex-start">
+          <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:28px">
+            <div style="width:26px;height:26px;border-radius:50%;background:{{ d3.circBg }};border:{{ d3.circBorder }};display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0;color:{{ d3.circColor }};flex:none;font-weight:600">{{ d3.label }}</div>
+            <div style="width:1px;flex:1;min-height:clamp(22px,4vh,40px);background:{{ d3.lineColor }};margin:3px 0"></div>
+          </div>
+          <div style="padding-top:3px;padding-bottom:clamp(10px,2vh,20px)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.13em;color:{{ d3.nameColor }};margin-bottom:5px">TEAM ACCESS</div>
+            <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(13px,1.2vw,15px);color:{{ d3.pointColor }};line-height:1.65;font-style:italic">Microsoft 365 · Google Workspace SSO<br />Pre-allocated secure workspace IDs</div>
+          </div>
+        </div>
+
+        <!-- Step 4 (no bottom line) -->
+        <div style="display:flex;gap:clamp(10px,1.2vw,16px);align-items:flex-start">
+          <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:28px">
+            <div style="width:26px;height:26px;border-radius:50%;background:{{ d4.circBg }};border:{{ d4.circBorder }};display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0;color:{{ d4.circColor }};flex:none;font-weight:600">{{ d4.label }}</div>
+          </div>
+          <div style="padding-top:3px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.13em;color:{{ d4.nameColor }};margin-bottom:5px">FIRST MATTER</div>
+            <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(13px,1.2vw,15px);color:{{ d4.pointColor }};line-height:1.65;font-style:italic">Buyer details · Transfer deed upload<br />Matter reference issued in 15 seconds</div>
+          </div>
+        </div>
+
+      </div><!-- end step diagram -->
+    </div><!-- end left panel -->
+
+    <!-- ════ RIGHT PANEL ════ -->
+    <div style="padding:clamp(32px,5vw,72px) clamp(22px,4vw,56px);display:flex;flex-direction:column;justify-content:center;overflow-y:auto">
+
+      <!-- ─── STEP 1 FORM ─── -->
+      <sc-if value="{{ showS1Form }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:fadeup .4s ease-out both">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(244,234,219,.32);margin-bottom:28px">STEP 01 OF 04 · IDENTITY VERIFICATION</div>
+
+        <div style="margin-bottom:15px">
+          <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">FIRM EMAIL</label>
+          <input id="s1-email" type="email" onInput="{{ onFirmEmail }}" placeholder="name@firmname.co.uk" style="width:100%;padding:13px 14px;font-size:13px" />
+          <sc-if value="{{ showS1EmailError }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#C8503C;margin-top:6px;letter-spacing:.02em">Personal email addresses are not permitted on this platform.</div>
+          </sc-if>
+        </div>
+
+        <div style="margin-bottom:15px">
+          <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">SRA AUTHORISATION NUMBER</label>
+          <input id="s1-sra" type="text" onInput="{{ onSraId }}" placeholder="e.g. 654321" style="width:100%;padding:13px 14px;font-size:13px;letter-spacing:.08em" />
+        </div>
+
+        <div style="margin-bottom:26px">
+          <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">REGISTERED LEGAL NAME</label>
+          <input id="s1-name" type="text" onInput="{{ onFirmName }}" placeholder="e.g. Thornton &amp; Associates LLP" style="width:100%;padding:13px 14px;font-size:13px" />
+        </div>
+
+        <sc-if value="{{ s1Error }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(200,80,60,.08);border:1px solid rgba(200,80,60,.22);padding:11px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#C8503C;margin-bottom:16px">{{ s1Error }}</div>
+        </sc-if>
+
+        <button onClick="{{ submitStep1 }}" disabled="{{ s1BtnDisabled }}" style="width:100%;background:#D5B95C;color:#1E150F;border:0;padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;font-weight:600">VERIFY FIRM IDENTITY →</button>
+
+        <button onClick="{{ fillDemoData }}" style="background:transparent;border:0;color:rgba(213,185,92,.38);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;padding:10px 0;width:100%;text-align:center;margin-top:2px;text-decoration:none">→ FILL DEMO DATA (Thornton &amp; Associates)</button>
+      </div>
+      </sc-if>
+
+      <!-- ─── STEP 2A: BANK ENTRY ─── -->
+      <sc-if value="{{ showS2BankEntry }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:fadeup .4s ease-out both">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(244,234,219,.32);margin-bottom:28px">STEP 02 OF 04 · ACCOUNT PROTECTION</div>
+
+        <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(15px,1.6vw,19px);line-height:1.55;color:rgba(244,234,219,.5);margin:0 0 24px;max-width:38ch">You will enter your client account details exactly once. Once locked, no fee-earner can ever manually type them on a matter.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">SORT CODE</label>
+            <input id="s2-sort" type="text" onInput="{{ onSortCode }}" value="{{ sortCode }}" placeholder="XX-XX-XX" style="width:100%;padding:13px 14px;font-size:13px;letter-spacing:.14em" />
+          </div>
+          <div>
+            <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">ACCOUNT NUMBER</label>
+            <input id="s2-acct" type="text" onInput="{{ onAccountNumber }}" value="{{ accountNumber }}" placeholder="12345678" style="width:100%;padding:13px 14px;font-size:13px;letter-spacing:.1em" />
+          </div>
+        </div>
+
+        <div style="background:#2A1D13;border:1px solid rgba(244,234,219,.07);padding:13px 15px;margin-bottom:24px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(244,234,219,.35);line-height:1.75;letter-spacing:.03em">◆&nbsp; A micro-deposit of <strong style="color:rgba(244,234,219,.55)">£0.01</strong> will be sent with a secure reference code. Enter that code to confirm ownership and lock your account details.</div>
+
+        <button onClick="{{ submitBankDetails }}" disabled="{{ s2BankBtnDisabled }}" style="width:100%;background:#D5B95C;color:#1E150F;border:0;padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;font-weight:600">SEND VERIFICATION DEPOSIT →</button>
+        <button onClick="{{ fillDemoData }}" style="background:transparent;border:0;color:rgba(213,185,92,.38);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;padding:10px 0;width:100%;text-align:center;margin-top:2px">→ FILL DEMO BANK DETAILS</button>
+      </div>
+      </sc-if>
+
+      <!-- ─── STEP 2B: MICRO-DEPOSIT ─── -->
+      <sc-if value="{{ showS2MicroVerify }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:fadeup .4s ease-out both">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(244,234,219,.32);margin-bottom:28px">STEP 02 OF 04 · OWNERSHIP CONFIRMATION</div>
+
+        <div style="background:#2A1D13;border:1px solid rgba(91,164,120,.2);padding:20px 22px;margin-bottom:24px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:#5BA478;margin-bottom:10px">MICRO-DEPOSIT SENT</div>
+          <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;line-height:1.5;color:rgba(244,234,219,.62);margin:0 0 12px">We've deposited <strong>£0.01</strong> into account ending <strong>{{ accountMasked }}</strong>.</p>
+          <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.4);line-height:1.7;margin:0">Open your online banking app and find the incoming £0.01 transaction. The payment reference — beginning <span style="color:#D5B95C">ATST-</span> — is printed on that line. Enter it below.</p>
+        </div>
+
+        <div style="margin-bottom:22px">
+          <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">ENTER THE REFERENCE CODE</label>
+          <input id="s2-code" type="text" onInput="{{ onMicroInput }}" value="{{ microInput }}" placeholder="ATST-XXXX" style="width:100%;padding:14px;font-size:18px;letter-spacing:.22em;text-transform:uppercase" />
+          <sc-if value="{{ s2Error }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#C8503C;margin-top:6px">{{ s2Error }}</div>
+          </sc-if>
+        </div>
+
+        <button onClick="{{ verifyMicro }}" disabled="{{ s2VerifyBtnDisabled }}" style="width:100%;background:#D5B95C;color:#1E150F;border:0;padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;font-weight:600">VERIFY &amp; LOCK ACCOUNT DETAILS →</button>
+
+        <div style="border:1px dashed rgba(213,185,92,.2);padding:10px 14px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;color:rgba(213,185,92,.4);margin-bottom:3px">DEMO ONLY · BANK STATEMENT REFERENCE</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.2em;color:rgba(213,185,92,.7)">{{ microRef }}</div>
+          </div>
+          <button onClick="{{ fillDemoData }}" style="background:transparent;border:1px solid rgba(213,185,92,.25);color:rgba(213,185,92,.55);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;padding:8px 12px;white-space:nowrap">AUTOFILL →</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ─── STEP 2C: BANK LOCKED ─── -->
+      <sc-if value="{{ showS2BankLocked }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:300px;animation:fadeup .4s ease-out both">
+        <svg viewBox="0 0 88 88" style="width:80px;height:80px;margin-bottom:22px;overflow:visible" fill="none">
+          <circle cx="44" cy="44" r="40" stroke="rgba(91,164,120,.28)" stroke-width="1.5" style="animation:lockpulse 2.2s ease-in-out infinite"></circle>
+          <circle cx="44" cy="44" r="28" fill="rgba(91,164,120,.07)" stroke="rgba(91,164,120,.16)" stroke-width="1"></circle>
+          <path d="M30 44 l9 10 l20 -22" stroke="#5BA478" stroke-width="2.5" stroke-linecap="square"></path>
+        </svg>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;color:#5BA478;margin-bottom:12px">ACCOUNT DETAILS CRYPTOGRAPHICALLY LOCKED</div>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;line-height:1.5;color:rgba(244,234,219,.5);max-width:28ch;margin:0">No fee-earner can ever manually enter or override these bank details.</p>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(244,234,219,.22);margin-top:18px;letter-spacing:.06em">Proceeding to team access<span style="animation:blink 1s steps(1) infinite">▌</span></div>
+      </div>
+      </sc-if>
+
+      <!-- ─── STEP 3 FORM ─── -->
+      <sc-if value="{{ showS3Form }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:fadeup .4s ease-out both">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(244,234,219,.32);margin-bottom:28px">STEP 03 OF 04 · TEAM ACCESS</div>
+
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">ADD TEAM MEMBER BY EMAIL</label>
+          <div style="display:flex;gap:9px">
+            <input id="s3-email" type="email" onInput="{{ onNewTeamEmail }}" onKeyDown="{{ onNewTeamEmailKeyDown }}" value="{{ newTeamEmail }}" placeholder="sarah.jenkins@firmname.co.uk" style="flex:1;padding:12px 14px;font-size:12px" />
+            <button onClick="{{ addTeamMember }}" style="background:transparent;border:1px solid #D5B95C;color:#D5B95C;padding:12px 18px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;white-space:nowrap">+ ADD</button>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(244,234,219,.22);margin-top:6px;line-height:1.6">Each member signs in with Microsoft 365 or Google. A secure workspace ID is pre-allocated before their invite is opened.</div>
+        </div>
+
+        <sc-if value="{{ s3HasMembers }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid rgba(244,234,219,.07);margin-bottom:20px;max-height:240px;overflow-y:auto">
+          <sc-for list="{{ teamMembers }}" as="member" hint-placeholder-count="0">
+          <div style="display:flex;align-items:center;gap:11px;padding:11px 13px;border-bottom:1px solid rgba(244,234,219,.05)">
+            <div style="width:32px;height:32px;background:#2A1D13;border:1px solid rgba(244,234,219,.1);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#D5B95C;flex:none">{{ member.initials }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ member.email }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5BA478;letter-spacing:.04em;margin-top:2px">{{ member.status }} · {{ member.addr }}</div>
+            </div>
+            <button onClick="{{ removeMember }}" data-email="{{ member.email }}" style="background:transparent;border:0;color:rgba(244,234,219,.2);font-size:16px;padding:4px 8px;line-height:1">×</button>
+          </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ s3Empty }}" hint-placeholder-val="{{ true }}">
+        <div style="border:1px solid rgba(244,234,219,.06);padding:24px 20px;text-align:center;margin-bottom:20px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;color:rgba(244,234,219,.16)">NO TEAM MEMBERS ADDED YET</div>
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;color:rgba(244,234,219,.28);margin-top:7px">Add at least one fee-earner to continue</div>
+        </div>
+        </sc-if>
+
+        <button onClick="{{ submitStep3 }}" disabled="{{ s3BtnDisabled }}" style="width:100%;background:#D5B95C;color:#1E150F;border:0;padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;font-weight:600">PROCEED TO FIRST MATTER →</button>
+        <button onClick="{{ fillDemoData }}" style="background:transparent;border:0;color:rgba(213,185,92,.38);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;padding:10px 0;width:100%;text-align:center;margin-top:2px">→ ADD DEMO TEAM MEMBERS</button>
+      </div>
+      </sc-if>
+
+      <!-- ─── STEP 4 FORM ─── -->
+      <sc-if value="{{ showS4Form }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:fadeup .4s ease-out both">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(244,234,219,.32);margin-bottom:28px">STEP 04 OF 04 · INSTRUCT A MATTER</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px">
+          <div>
+            <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">HOMEBUYER FULL NAME</label>
+            <input id="s4-buyer" type="text" onInput="{{ onBuyerName }}" placeholder="Igor Kochany" style="width:100%;padding:13px 14px;font-size:13px" />
+          </div>
+          <div>
+            <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">HOMEBUYER EMAIL</label>
+            <input id="s4-email" type="email" onInput="{{ onBuyerEmail }}" placeholder="igor.buyer@gmail.com" style="width:100%;padding:13px 14px;font-size:13px" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:13px">
+          <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">EXPECTED DEPOSIT</label>
+          <input id="s4-deposit" type="text" onInput="{{ onDeposit }}" placeholder="£35,000" style="width:100%;padding:13px 14px;font-size:13px" />
+        </div>
+
+        <div style="margin-bottom:24px">
+          <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(244,234,219,.4);margin-bottom:7px">CONTRACT / TRANSFER DEED</label>
+          <div onClick="{{ pickContract }}" onDragOver="{{ onDragOver }}" onDrop="{{ onContractDrop }}" style="background:#2A1D13;border:1px solid rgba(244,234,219,.11);padding:22px;text-align:center;cursor:pointer;min-height:80px;display:flex;align-items:center;justify-content:center">
+            <sc-if value="{{ showContractFile }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5BA478">✓</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">{{ contractFileName }}</span>
+            </div>
+            </sc-if>
+            <sc-if value="{{ showContractEmpty }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;color:rgba(244,234,219,.4)">Drop PDF here</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:rgba(244,234,219,.18);margin-top:5px">OR CLICK TO BROWSE · NEVER UPLOADED TO SERVER</div>
+            </div>
+            </sc-if>
+          </div>
+          <input type="file" id="contract-input" onChange="{{ onContractInput }}" accept=".pdf,.doc,.docx" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" />
+        </div>
+
+        <button onClick="{{ generateMatter }}" disabled="{{ s4BtnDisabled }}" style="width:100%;background:#8B4E2F;color:#F4EADB;border:0;padding:17px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;font-weight:600">GENERATE SECURE WORKSPACE →</button>
+        <button onClick="{{ fillDemoData }}" style="background:transparent;border:0;color:rgba(213,185,92,.38);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;padding:10px 0;width:100%;text-align:center;margin-top:2px">→ FILL DEMO MATTER (Kochany / £35,000)</button>
+      </div>
+      </sc-if>
+
+      <!-- ─── STEP 4 RECEIPT ─── -->
+      <sc-if value="{{ showS4Receipt }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:fadeup .4s ease-out both">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:#5BA478;margin-bottom:28px">WORKSPACE GENERATED SUCCESSFULLY</div>
+
+        <div style="background:#2A1D13;border:1px solid rgba(213,185,92,.17);padding:24px;margin-bottom:18px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(244,234,219,.32);margin-bottom:10px">MATTER REFERENCE</div>
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(30px,4vw,50px);letter-spacing:.06em;color:#D5B95C;font-weight:600;line-height:1">{{ matterRef }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(244,234,219,.3);margin-top:14px;line-height:1.8;letter-spacing:.04em">CLIENT: {{ buyerNameDisplay }}<br />EMAIL: {{ buyerEmailDisplay }}<br />DEPOSIT: {{ depositDisplay }}</div>
+        </div>
+
+        <div style="background:#2A1D13;border:1px solid rgba(244,234,219,.07);padding:15px 17px;margin-bottom:22px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(244,234,219,.4);line-height:1.85;letter-spacing:.03em">Send this to your client:<br /><span style="color:rgba(244,234,219,.75)">"Go to attesta.legal and enter <strong style="color:#D5B95C;letter-spacing:.1em">{{ matterRef }}</strong> to access our secure bank details and sign your contract."</span></div>
+
+        <button onClick="{{ goComplete }}" style="width:100%;background:#D5B95C;color:#1E150F;border:0;padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;font-weight:600">COMPLETE ONBOARDING →</button>
+      </div>
+      </sc-if>
+
+    </div><!-- end right panel -->
+  </div><!-- end two-col grid -->
+  </sc-if>
+
+  <!-- ══ PENDING: SRA VERIFICATION ══ -->
+  <sc-if value="{{ showPending }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:calc(100vh - 62px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px">
+    <svg viewBox="0 0 180 180" style="width:140px;height:140px;margin-bottom:36px;overflow:visible" fill="none">
+      <g style="transform-origin:90px 90px;animation:spin 20s linear infinite">
+        <polygon points="90,8 165,52 165,128 90,172 15,128 15,52" stroke="rgba(213,185,92,.14)" stroke-width="1"></polygon>
+      </g>
+      <g style="transform-origin:90px 90px;animation:spinrev 13s linear infinite">
+        <polygon points="90,22 158,62 158,118 90,158 22,118 22,62" stroke="rgba(213,185,92,.26)" stroke-width="1"></polygon>
+      </g>
+      <circle cx="90" cy="90" r="50" stroke="rgba(213,185,92,.16)" stroke-width="1" stroke-dasharray="4 8" style="animation:spin 9s linear infinite;transform-origin:90px 90px"></circle>
+      <circle cx="90" cy="90" r="32" stroke="rgba(213,185,92,.44)" stroke-width="1.5" style="animation:spinrev 5s linear infinite;transform-origin:90px 90px"></circle>
+      <circle cx="90" cy="90" r="6" fill="#D5B95C" style="animation:pulsedot 1.6s ease-in-out infinite"></circle>
+    </svg>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.28em;color:#D5B95C;margin-bottom:28px">SRA CROSS-REFERENCE IN PROGRESS</div>
+    <div style="display:flex;flex-direction:column;gap:14px;text-align:left;max-width:420px;width:100%">
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out .2s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5BA478;width:16px;flex:none">✓</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.52)">EMAIL DOMAIN VALIDATED: {{ pendingDomain }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out .85s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5BA478;width:16px;flex:none">✓</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.52)">SRA REGISTER CONSULTED: #{{ pendingSraId }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out 1.6s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5BA478;width:16px;flex:none">✓</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.52)">REGISTERED NAME CONFIRMED: {{ pendingFirmName }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out 2.3s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#D5B95C;width:16px;flex:none;animation:blink 1s steps(1) infinite">▌</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.32)">ALLOCATING SECURE WORKSPACE...</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══ GENERATING WORKSPACE ══ -->
+  <sc-if value="{{ showGenerating }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:calc(100vh - 62px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px">
+    <svg viewBox="0 0 180 180" style="width:120px;height:120px;margin-bottom:36px;overflow:visible" fill="none">
+      <g style="transform-origin:90px 90px;animation:spin 13s linear infinite">
+        <polygon points="90,12 162,54 162,126 90,168 18,126 18,54" stroke="rgba(139,78,47,.42)" stroke-width="1"></polygon>
+      </g>
+      <g style="transform-origin:90px 90px;animation:spinrev 8s linear infinite">
+        <polygon points="90,24 158,63 158,117 90,156 22,117 22,63" stroke="rgba(213,185,92,.36)" stroke-width="1.2"></polygon>
+      </g>
+      <circle cx="90" cy="90" r="34" stroke="rgba(213,185,92,.58)" stroke-width="1.5" style="animation:spinrev 4s linear infinite;transform-origin:90px 90px"></circle>
+      <circle cx="90" cy="90" r="5" fill="#D5B95C"></circle>
+    </svg>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.28em;color:#D5B95C;margin-bottom:28px">GENERATING SECURE WORKSPACE</div>
+    <div style="display:flex;flex-direction:column;gap:14px;text-align:left;max-width:420px;width:100%">
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out .3s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5BA478;width:16px;flex:none">✓</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.52)">TRANSFER DEED FINGERPRINTED IN-BROWSER</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out .95s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5BA478;width:16px;flex:none">✓</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.52)">CLIENT WORKSPACE PARAMETERS DERIVED</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out 1.7s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5BA478;width:16px;flex:none">✓</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.52)">COMPLIANCE RECORD PUBLISHED TO REGISTER</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;opacity:0;animation:fadeup .5s ease-out 2.4s forwards">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#D5B95C;width:16px;flex:none;animation:blink 1s steps(1) infinite">▌</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(244,234,219,.32)">ISSUING MATTER REFERENCE...</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══ ONBOARDING COMPLETE ══ -->
+  <sc-if value="{{ showComplete }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:calc(100vh - 62px);display:grid;grid-template-columns:1fr 1fr">
+    <div style="border-right:1px solid rgba(244,234,219,.11);padding:clamp(32px,5vw,72px) clamp(20px,4vw,52px);display:flex;flex-direction:column;justify-content:center;animation:fadeup .5s ease-out both">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;color:#5BA478;margin-bottom:20px">ONBOARDING COMPLETE</div>
+      <h2 style="font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:clamp(26px,3.2vw,44px);line-height:1.02;letter-spacing:-.02em;margin:0 0 20px;max-width:22ch">{{ firmNameDisplay }} is now registered and active.</h2>
+      <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(14px,1.5vw,18px);line-height:1.6;color:rgba(244,234,219,.45);max-width:36ch;margin:0">Identity verified, client account locked, team on single sign-on, first secure matter workspace live.</p>
+      <div style="margin-top:36px">
+        <svg viewBox="0 0 150 150" style="width:120px;height:120px;overflow:visible" fill="none">
+          <circle cx="75" cy="75" r="64" stroke="rgba(91,164,120,.25)" stroke-width="1.5" style="animation:lockpulse 3s ease-in-out infinite"></circle>
+          <circle cx="75" cy="75" r="48" stroke="rgba(91,164,120,.12)" stroke-width="1" fill="rgba(91,164,120,.04)"></circle>
+          <path d="M50 75 l15 16 l32 -32" stroke="#5BA478" stroke-width="2.8" stroke-linecap="square"></path>
+          <text x="75" y="118" fill="rgba(91,164,120,.42)" font-family="'IBM Plex Mono',monospace" font-size="7" letter-spacing="2.5" text-anchor="middle">SRA VERIFIED</text>
+        </svg>
+      </div>
+    </div>
+
+    <div style="padding:clamp(32px,5vw,72px) clamp(20px,4vw,52px);display:flex;flex-direction:column;justify-content:center;animation:fadeup .5s ease-out .15s both">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(244,234,219,.28);margin-bottom:20px">FIRM PROFILE SUMMARY</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:24px">
+        <div style="background:#2A1D13;border:1px solid rgba(244,234,219,.07);padding:13px 15px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.13em;color:rgba(244,234,219,.28);margin-bottom:5px">IDENTITY</div>
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ firmNameDisplay }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5BA478;margin-top:3px">SRA #{{ sraIdDisplay }}</div>
+        </div>
+        <div style="background:#2A1D13;border:1px solid rgba(244,234,219,.07);padding:13px 15px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.13em;color:rgba(244,234,219,.28);margin-bottom:5px">CLIENT ACCOUNT</div>
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:14px">Locked · Verified</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5BA478;margin-top:3px">WRITE-ONCE · IMMUTABLE</div>
+        </div>
+        <div style="background:#2A1D13;border:1px solid rgba(244,234,219,.07);padding:13px 15px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.13em;color:rgba(244,234,219,.28);margin-bottom:5px">TEAM ACCESS</div>
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:14px">{{ teamCountDisplay }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5BA478;margin-top:3px">SSO ENABLED</div>
+        </div>
+        <div style="background:#2A1D13;border:1px solid rgba(213,185,92,.13);padding:13px 15px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.13em;color:rgba(244,234,219,.28);margin-bottom:5px">FIRST MATTER</div>
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;color:#D5B95C">{{ matterRef }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#D5B95C;margin-top:3px;opacity:.55">WORKSPACE ACTIVE</div>
+        </div>
+      </div>
+
+      <div style="background:#2A1D13;border:1px solid rgba(213,185,92,.17);padding:18px 20px;margin-bottom:14px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;color:#D5B95C;margin-bottom:7px">SRA SAFE HARBOUR · COMPLIANCE PACK</div>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(13px,1.4vw,16px);line-height:1.55;color:rgba(244,234,219,.5);margin:0 0 14px;max-width:38ch">Pre-written §3.1 statement for your professional indemnity insurer — use it to negotiate lower APP fraud premiums.</p>
+        <button onClick="{{ downloadCompliance }}" style="width:100%;background:{{ complianceBtnBg }};color:{{ complianceBtnColor }};border:1px solid #D5B95C;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.15em;font-weight:600">{{ complianceBtnLabel }}</button>
+      </div>
+
+      <button onClick="{{ enterDashboard }}" style="width:100%;background:#8B4E2F;color:#F4EADB;border:0;padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;font-weight:600">ENTER YOUR DASHBOARD →</button>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  state = {
+    step: 1,
+    pendingVerification: false,
+    firmEmail: '',
+    sraId: '',
+    firmName: '',
+    s1Error: '',
+    sortCode: '',
+    accountNumber: '',
+    microDepositSent: false,
+    microRef: '',
+    microInput: '',
+    s2Error: '',
+    bankLocked: false,
+    teamMembers: [],
+    newTeamEmail: '',
+    buyerName: '',
+    buyerEmail: '',
+    depositAmount: '',
+    contractFile: null,
+    s4Generating: false,
+    matterRef: '',
+    complianceDownloaded: false,
+  };
+
+  _addTeamMember() {
+    const email = this.state.newTeamEmail.trim();
+    if (!email || !email.includes('@') || !email.includes('.')) return;
+    if (this.state.teamMembers.find(m => m.email === email)) return;
+    const h = () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+    const addr = '0x' + [h(),h(),h(),h()].join('') + '…' + [h(),h()].join('');
+    this.setState(s => ({
+      teamMembers: [...s.teamMembers, { email, addr, initials: email.slice(0, 2).toUpperCase(), status: 'PRE-ALLOCATED' }],
+      newTeamEmail: ''
+    }));
+  }
+
+  _setInput(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const isPersonal = e => /^[^@]+@(gmail|yahoo|hotmail|outlook|icloud|aol|proton)\./i.test(e);
+    const sortDigits = s.sortCode.replace(/\D/g, '');
+    const acctDigits = s.accountNumber.replace(/\D/g, '');
+    const validS1 = s.firmEmail && !isPersonal(s.firmEmail) && s.firmEmail.includes('@') && s.sraId.length >= 5 && s.firmName.length >= 3;
+    const validBank = sortDigits.length === 6 && acctDigits.length === 8;
+    const validMicro = s.microInput.length >= 9;
+    const validS4 = s.buyerName && s.buyerEmail && s.depositAmount && s.contractFile;
+
+    // Progress header
+    const eff = s.pendingVerification ? 1 : s.step;
+    const progressSteps = [
+      { n: '01', label: 'IDENTITY', showLine: true },
+      { n: '02', label: 'ACCOUNT', showLine: true },
+      { n: '03', label: 'TEAM', showLine: true },
+      { n: '04', label: 'MATTER', showLine: false },
+    ].map((ps, i) => {
+      const sn = i + 1;
+      const done = eff > sn;
+      const active = eff === sn;
+      return {
+        ...ps,
+        bg: done ? '#A36F3E' : active ? '#D5B95C' : 'transparent',
+        border: (done || active) ? 'none' : '1px solid rgba(244,234,219,.18)',
+        textColor: (done || active) ? '#1E150F' : 'rgba(244,234,219,.3)',
+        labelColor: active ? '#D5B95C' : done ? '#A36F3E' : 'rgba(244,234,219,.2)',
+      };
+    });
+
+    // Step diagram styling helper
+    const dStep = (sn) => {
+      const done = eff > sn;
+      const active = eff === sn;
+      const pend = sn === 1 && s.pendingVerification;
+      return {
+        label: done ? '✓' : ('0' + sn),
+        circBg: done ? '#A36F3E' : (active || pend) ? '#D5B95C' : 'transparent',
+        circBorder: (done || active || pend) ? '2px solid transparent' : '1px solid rgba(244,234,219,.16)',
+        circColor: (done || active || pend) ? '#1E150F' : 'rgba(244,234,219,.25)',
+        nameColor: active ? '#D5B95C' : done ? 'rgba(213,185,92,.52)' : 'rgba(244,234,219,.18)',
+        pointColor: active ? 'rgba(244,234,219,.48)' : done ? 'rgba(213,185,92,.3)' : 'rgba(244,234,219,.14)',
+        lineColor: done ? 'rgba(163,111,62,.28)' : active ? 'rgba(213,185,92,.13)' : 'rgba(244,234,219,.07)',
+      };
+    };
+
+    // Left panel copy
+    const leftPanels = {
+      1: { tag: '01 · SRA VERIFICATION', heading: 'Regulated firms only.', sub: 'Every firm is cross-referenced against the public Solicitors Register. Personal emails are blocked. Your domain must match the SRA record.' },
+      2: { tag: '02 · WRITE-ONCE CEREMONY', heading: 'Client account. Locked once. Verified forever.', sub: "Bank details are cryptographically bound to your profile. Fee-earners can never manually type them — they attach your master profile to each matter." },
+      3: { tag: '03 · TEAM ACCESS', heading: 'No new passwords. No training.', sub: 'Each member signs in with their existing Microsoft 365 or Google Workspace. Secure workspace access is pre-allocated before their invite is opened.' },
+      4: { tag: s.matterRef ? '04 · WORKSPACE ACTIVE' : '04 · FIRST MATTER', heading: s.matterRef ? 'Your first secure matter is live.' : 'Generate a secure client workspace in 15 seconds.', sub: s.matterRef ? 'Send the Matter Reference to your client. They access it at attesta.legal to view the verified bank details and sign the contract.' : "Enter the buyer's details, upload the deed, and Attesta generates a Matter Reference for your client to access their secure workspace." },
+    };
+    const lp = leftPanels[Math.min(s.step, 4)] || leftPanels[1];
+
+    return {
+      progressSteps,
+      d1: dStep(1),
+      d2: dStep(2),
+      d3: dStep(3),
+      d4: dStep(4),
+      leftTag: lp.tag,
+      leftHeading: lp.heading,
+      leftSub: lp.sub,
+
+      // Layout switches
+      showTwoCol: !s.pendingVerification && !s.s4Generating && s.step >= 1 && s.step <= 4,
+      showPending: s.pendingVerification,
+      showGenerating: s.s4Generating,
+      showComplete: s.step === 5,
+
+      // Right panel states
+      showS1Form: s.step === 1,
+      showS2BankEntry: s.step === 2 && !s.microDepositSent,
+      showS2MicroVerify: s.step === 2 && s.microDepositSent && !s.bankLocked,
+      showS2BankLocked: s.step === 2 && s.bankLocked,
+      showS3Form: s.step === 3,
+      showS4Form: s.step === 4 && !s.matterRef,
+      showS4Receipt: s.step === 4 && !!s.matterRef,
+
+      // Step 1
+      s1Error: s.s1Error,
+      showS1EmailError: !!(s.firmEmail && isPersonal(s.firmEmail)),
+      s1BtnDisabled: !validS1,
+      onFirmEmail: e => this.setState({ firmEmail: e.target.value, s1Error: '' }),
+      onSraId: e => this.setState({ sraId: e.target.value.replace(/\D/g, '').slice(0, 8), s1Error: '' }),
+      onFirmName: e => this.setState({ firmName: e.target.value, s1Error: '' }),
+      submitStep1: () => {
+        if (!validS1) return;
+        this.setState({ pendingVerification: true, s1Error: '' });
+        setTimeout(() => this.setState({ pendingVerification: false, step: 2 }), 3600);
+      },
+      pendingDomain: s.firmEmail.includes('@') ? s.firmEmail.split('@')[1] : '',
+      pendingSraId: s.sraId,
+      pendingFirmName: s.firmName,
+
+      // Step 2
+      sortCode: s.sortCode,
+      accountNumber: s.accountNumber,
+      microRef: s.microRef,
+      microInput: s.microInput,
+      s2Error: s.s2Error,
+      s2BankBtnDisabled: !validBank,
+      s2VerifyBtnDisabled: !validMicro,
+      accountMasked: acctDigits ? '••••' + acctDigits.slice(-4) : '',
+      onSortCode: e => {
+        let v = e.target.value.replace(/\D/g, '').slice(0, 6);
+        let d = v.length > 4 ? v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4) : v.length > 2 ? v.slice(0,2)+'-'+v.slice(2) : v;
+        this.setState({ sortCode: d, s2Error: '' });
+      },
+      onAccountNumber: e => this.setState({ accountNumber: e.target.value.replace(/\D/g,'').slice(0,8), s2Error: '' }),
+      onMicroInput: e => this.setState({ microInput: e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g,'').slice(0,9), s2Error: '' }),
+      submitBankDetails: () => {
+        if (!validBank) return;
+        const ref = 'ATST-' + (1000 + Math.floor(Math.random() * 9000));
+        this.setState({ microDepositSent: true, microRef: ref, s2Error: '' });
+      },
+      verifyMicro: () => {
+        if (s.microInput === s.microRef) {
+          this.setState({ bankLocked: true });
+          setTimeout(() => this.setState({ step: 3 }), 2200);
+        } else {
+          this.setState({ s2Error: 'Code does not match. Please check your bank statement.' });
+        }
+      },
+
+      // Step 3
+      teamMembers: s.teamMembers,
+      newTeamEmail: s.newTeamEmail,
+      s3HasMembers: s.teamMembers.length > 0,
+      s3Empty: s.teamMembers.length === 0,
+      s3BtnDisabled: s.teamMembers.length === 0,
+      teamCountDisplay: s.teamMembers.length === 1 ? '1 Member' : s.teamMembers.length + ' Members',
+      onNewTeamEmail: e => this.setState({ newTeamEmail: e.target.value }),
+      onNewTeamEmailKeyDown: e => { if (e.key === 'Enter') { e.preventDefault(); this._addTeamMember(); } },
+      addTeamMember: () => this._addTeamMember(),
+      removeMember: e => {
+        const email = e.currentTarget.dataset.email;
+        this.setState(ps => ({ teamMembers: ps.teamMembers.filter(m => m.email !== email) }));
+      },
+      submitStep3: () => this.setState({ step: 4 }),
+
+      // Step 4
+      contractFileName: s.contractFile ? s.contractFile.name : '',
+      showContractFile: !!s.contractFile,
+      showContractEmpty: !s.contractFile,
+      s4BtnDisabled: !validS4,
+      onBuyerName: e => this.setState({ buyerName: e.target.value }),
+      onBuyerEmail: e => this.setState({ buyerEmail: e.target.value }),
+      onDeposit: e => this.setState({ depositAmount: e.target.value }),
+      onDragOver: e => e.preventDefault(),
+      onContractDrop: e => { e.preventDefault(); const f = e.dataTransfer?.files?.[0]; if (f) this.setState({ contractFile: f }); },
+      pickContract: () => document.getElementById('contract-input')?.click(),
+      onContractInput: e => { const f = e.target.files?.[0]; if (f) this.setState({ contractFile: f }); },
+      generateMatter: () => {
+        if (!validS4) return;
+        this.setState({ s4Generating: true });
+        setTimeout(() => {
+          const ref = 'REF-' + (1000 + Math.floor(Math.random() * 9000)) + '-UK';
+          this.setState({ s4Generating: false, matterRef: ref });
+        }, 3200);
+      },
+      matterRef: s.matterRef,
+      buyerNameDisplay: s.buyerName,
+      buyerEmailDisplay: s.buyerEmail,
+      depositDisplay: s.depositAmount,
+      goComplete: () => this.setState({ step: 5 }),
+
+      // Demo data filler
+      fillDemoData: () => {
+        const { step, microDepositSent, microRef } = this.state;
+        if (step === 1) {
+          this.setState({ firmEmail: 'partner@thorntonassociates.co.uk', sraId: '654321', firmName: 'Thornton & Associates LLP', s1Error: '' });
+          this._setInput('s1-email', 'partner@thorntonassociates.co.uk');
+          this._setInput('s1-sra', '654321');
+          this._setInput('s1-name', 'Thornton & Associates LLP');
+        } else if (step === 2 && !microDepositSent) {
+          this.setState({ sortCode: '20-14-53', accountNumber: '00785432', s2Error: '' });
+          this._setInput('s2-sort', '20-14-53');
+          this._setInput('s2-acct', '00785432');
+        } else if (step === 2 && microDepositSent) {
+          this.setState({ microInput: microRef, s2Error: '' });
+          this._setInput('s2-code', microRef);
+        } else if (step === 3) {
+          const h = () => Math.floor(Math.random()*256).toString(16).padStart(2,'0');
+          const addr = n => '0x'+n+[h(),h()].join('')+'…'+[h(),h()].join('');
+          this.setState({ teamMembers: [
+            { email: 'sarah.jenkins@thorntonassociates.co.uk', addr: addr('4a'), initials: 'SJ', status: 'PRE-ALLOCATED' },
+            { email: 'james.hart@thorntonassociates.co.uk', addr: addr('7d'), initials: 'JH', status: 'PRE-ALLOCATED' },
+            { email: 'priya.sharma@thorntonassociates.co.uk', addr: addr('2c'), initials: 'PS', status: 'PRE-ALLOCATED' },
+          ]});
+        } else if (step === 4) {
+          const f = new File(['demo'], 'Transfer-Deed-Kochany-2026.pdf', { type: 'application/pdf' });
+          this.setState({ buyerName: 'Igor Kochany', buyerEmail: 'igor.buyer@gmail.com', depositAmount: '£35,000', contractFile: f });
+          this._setInput('s4-buyer', 'Igor Kochany');
+          this._setInput('s4-email', 'igor.buyer@gmail.com');
+          this._setInput('s4-deposit', '£35,000');
+        }
+      },
+
+      // Complete
+      firmNameDisplay: s.firmName,
+      sraIdDisplay: s.sraId,
+      complianceBtnBg: s.complianceDownloaded ? 'transparent' : '#D5B95C',
+      complianceBtnColor: s.complianceDownloaded ? '#D5B95C' : '#1E150F',
+      complianceBtnLabel: s.complianceDownloaded ? '✓ COMPLIANCE PACK DOWNLOADED' : '↓ DOWNLOAD SRA REGULATORY COMPLIANCE PACK',
+      downloadCompliance: () => {
+        this.setState({ complianceDownloaded: true });
+        const lines = [
+          'ATTESTA · SRA REGULATORY COMPLIANCE PACK','==========================================','',
+          'ISSUED TO: ' + s.firmName,'SRA AUTHORISATION NO: ' + s.sraId,'DATE: ' + new Date().toISOString().split('T')[0],'',
+          'COMPLIANCE STATEMENT','--------------------','',
+          'This firm utilises Attesta distributed ledger technology to enforce immutable',
+          'cryptographic hashing on all outgoing Client Account bank details, complying',
+          'directly with SRA Code of Conduct Paragraph 3.1 regarding the safe transmission',
+          'and safeguarding of client money against Authorised Push Payment (APP) interception.','',
+          'Bank account details are captured once under a cryptographically verified',
+          'Write-Once protocol. No fee-earner can manually enter, edit, or override the',
+          "firm's registered client account details on any matter workspace.",'',
+          'This document may be presented to professional indemnity insurers as evidence',
+          'of enhanced financial controls commensurate with current SRA guidance.','',
+          '----------------------------------------------',
+          'Generated by Attesta · attesta.legal',
+          'Matter: ' + (s.matterRef || 'N/A'),
+        ];
+        const a = document.createElement('a');
+        a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+        a.download = (s.firmName||'Firm').replace(/\s+/g,'-') + '-SRA-Compliance-Pack.txt';
+        a.click();
+      },
+      enterDashboard: () => this.setState({ step:1, pendingVerification:false, firmEmail:'', sraId:'', firmName:'', s1Error:'', sortCode:'', accountNumber:'', microDepositSent:false, microRef:'', microInput:'', s2Error:'', bankLocked:false, teamMembers:[], newTeamEmail:'', buyerName:'', buyerEmail:'', depositAmount:'', contractFile:null, s4Generating:false, matterRef:'', complianceDownloaded:false }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
